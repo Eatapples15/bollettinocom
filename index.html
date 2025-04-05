@@ -28,7 +28,7 @@
     </div>
 
     <script>
-        const bases = ["A1", "A2", "B", "C", "D", "E1", "E2"];
+        const bases = ["Matera", "Potenza", "Lauria", "Melfi", "Pisticci", "Venosa", "Tricarico"]; // Nomi dei comuni dal file SVG
         const colors = {
             "Verde (Assente)": "#008000",
             "Giallo (Ordinario)": "#FFFF00",
@@ -56,14 +56,14 @@
                 </div>`;
         });
 
-        const baseToSvgId = {
-            "A1": "A1",
-            "A2": "A2",
-            "B": "B",
-            "C": "C",
-            "D": "D",
-            "E1": "E1",
-            "E2": "E2",
+        const baseToSvgId = { // Mappa i nomi dei comuni ai loro ID nel file SVG
+            "Matera": "Matera",
+            "Potenza": "Potenza",
+            "Lauria": "Lauria",
+            "Melfi": "Melfi",
+            "Pisticci": "Pisticci",
+            "Venosa": "Venosa",
+            "Tricarico": "Tricarico"
         };
 
         function generateMaps() {
@@ -72,7 +72,7 @@
             mapOggi.innerHTML = "<h3>Oggi</h3>";
             mapDomani.innerHTML = "<h3>Domani</h3>";
 
-            fetch('comuni.svg') // Percorso corretto
+            fetch('comuni.svg') // Percorso corretto al file SVG
                 .then(response => response.text())
                 .then(svg => {
                     mapOggi.innerHTML += svg;
