@@ -283,7 +283,7 @@
   </select>
  
 
-  <button onclick="updateMaps()">Aggiorna Mappa</button>
+  <button onclick="mostraMappa()">Mostra Mappa</button>
   <button onclick="generatePDF()">Esporta PDF</button>
  
 
@@ -368,7 +368,7 @@
   const svgUrl = 'https://raw.githubusercontent.com/Eatapples15/bollettinocom/main/comuni.svg';
  
 
-  fetch(svgUrl)
+  return fetch(svgUrl)
   .then(response => response.text())
   .then(svg => {
   mapOggi.innerHTML += svg;
@@ -413,10 +413,12 @@
   }
  
 
-  mapOggi.style.display = 'none';
-  mapDomani.style.display = 'none';
+  return { mapOggiHTML: mapOggi.innerHTML, mapDomaniHTML: mapDomani.innerHTML };
   })
-  .catch(error => console.error('Error fetching SVG:', error));
+  .catch(error => {
+  console.error('Error fetching SVG:', error);
+  return { mapOggiHTML: '<p>Errore nel caricamento della mappa</p>', mapDomaniHTML: '<p>Errore nel caricamento della mappa</p>' };
+  });
   }
  
 
@@ -450,20 +452,42 @@
   }
  
 
-  function showMap(giorno) {
-  const mapOggi = document.getElementById('map-oggi');
-  const mapDomani = document.getElementById('map-domani');
- 
-
-  mapOggi.style.display = 'none';
-  mapDomani.style.display = 'none';
- 
-
-  if (giorno === 'oggi') {
-  mapOggi.style.display = 'block';
-  } else if (giorno === 'domani') {
-  mapDomani.style.display = 'block';
+  function mostraMappa() {
+  updateMaps().then(mapsHTML => {
+  const nuovaFinestra = window.open('', '_blank');
+  nuovaFinestra.document.write(`
+  <html>
+  <head>
+  <title>Mappa Criticità</title>
+  <style>
+  html, body { margin: 0; padding: 0; height: 100%; }
+  .maps-container {
+  display: flex;
+  justify-content: space-around;
+  height: 100%;
   }
+  .map {
+  width: 48%;
+  height: 100%;
+  }
+  .map h3 { text-align: center; }
+  .map svg { width: 100%; height: 100%; }
+  </style>
+  </head>
+  <body>
+  <div class="maps-container">
+  <div class="map">
+  ${mapsHTML.mapOggiHTML}
+  </div>
+  <div class="map">
+  ${mapsHTML.mapDomaniHTML}
+  </div>
+  </div>
+  </body>
+  </html>
+  `);
+  nuovaFinestra.document.close();
+  });
   }
  
 
