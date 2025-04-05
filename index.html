@@ -11,7 +11,7 @@
         .base { display: flex; justify-content: space-between; margin-bottom: 10px; }
         button { margin-top: 20px; padding: 10px; cursor: pointer; }
         .maps-container { display: flex; justify-content: space-between; margin-top: 20px; }
-        .map { width: 45%; height: 400px; border: 1px solid #000; padding: 10px; overflow: auto;}
+        .map { width: 45%; height: 300px; border: 1px solid #000; padding: 10px; overflow: auto;}
         .map svg { width: 100%; height: 100%; }
     </style>
 </head>
@@ -28,7 +28,7 @@
     </div>
 
     <script>
-        const bases = ["Matera", "Potenza", "Lauria", "Melfi", "Pisticci", "Venosa", "Tricarico"]; // Nomi dei comuni dal file SVG
+        const bases = ["Matera", "Potenza", "Lauria", "Melfi", "Pisticci", "Venosa", "Tricarico"];
         const colors = {
             "Verde (Assente)": "#008000",
             "Giallo (Ordinario)": "#FFFF00",
@@ -56,7 +56,7 @@
                 </div>`;
         });
 
-        const baseToSvgId = { // Mappa i nomi dei comuni ai loro ID nel file SVG
+        const baseToSvgId = {
             "Matera": "Matera",
             "Potenza": "Potenza",
             "Lauria": "Lauria",
@@ -72,7 +72,7 @@
             mapOggi.innerHTML = "<h3>Oggi</h3>";
             mapDomani.innerHTML = "<h3>Domani</h3>";
 
-            fetch('comuni.svg') // Percorso corretto al file SVG
+            fetch('comuni.svg')
                 .then(response => response.text())
                 .then(svg => {
                     mapOggi.innerHTML += svg;
