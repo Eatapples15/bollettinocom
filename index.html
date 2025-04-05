@@ -114,7 +114,7 @@
             mapOggi.innerHTML = "<h3>Oggi</h3>";
             mapDomani.innerHTML = "<h3>Domani</h3>";
 
-            fetch('comuni.svg')
+            fetch('https://github.com/Eatapples15/bollettinocom/blob/main/comuni.svg') // Percorso corretto
                 .then(response => response.text())
                 .then(svg => {
                     mapOggi.innerHTML += svg;
@@ -125,12 +125,30 @@
                         const colorDomani = document.getElementById(`${base}-domani`).value;
 
                         comuniPerBase[base].forEach(comuneId => {
-                            const areaOggi = mapOggi.querySelector(`#${comuneId}`);
-                            const areaDomani = mapDomani.querySelector(`#${comuneId}`);
+                            // Seleziona tutti gli elementi con l'ID corrispondente all'interno della mappa
+                            const areeOggi = mapOggi.querySelectorAll(`#${comuneId}`);
+                            const areeDomani = mapDomani.querySelectorAll(`#${comuneId}`);
 
-                            if (areaOggi) areaOggi.style.fill = colorOggi;
-                            if (areaDomani) areaDomani.style.fill = colorDomani;
+                            // Applica il colore a tutti gli elementi trovati
+                            areeOggi.forEach(area => {
+                                area.style.fill = colorOggi;
+                            });
+                            areeDomani.forEach(area => {
+                                area.style.fill = colorDomani;
+                            });
                         });
+                    }
+
+                    // Imposta le dimensioni della mappa SVG per adattarsi al contenitore
+                    const svgOggi = mapOggi.querySelector('svg');
+                    const svgDomani = mapDomani.querySelector('svg');
+                    if (svgOggi) {
+                        svgOggi.style.width = '100%';
+                        svgOggi.style.height = '100%';
+                    }
+                    if (svgDomani) {
+                        svgDomani.style.width = '100%';
+                        svgDomani.style.height = '100%';
                     }
                 })
                 .catch(error => console.error('Error fetching SVG:', error));
