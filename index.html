@@ -159,6 +159,11 @@
                         svgDomani.style.display = 'block';
                         svgDomani.style.margin = 'auto';
                     }
+
+                    // Aggiungi queste righe per assicurare che il contenitore scorra correttamente
+                    mapOggi.style.overflow = 'auto';
+                    mapDomani.style.overflow = 'auto';
+
                 })
                 .catch(error => console.error('Error fetching SVG:', error));
         }
