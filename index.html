@@ -30,22 +30,32 @@
     </div>
 
     <script>
-        const bases = ["Matera", "Potenza", "Lauria", "Melfi", "Pisticci", "Venosa", "Tricarico"];
+        const comuniPerBase = {
+            "A1": ["Atella", "Barile", "Ginestra", "Lavello", "Maschito", "Melfi", "Montemilone", "Palazzo San Gervasio", "Pescopagano", "Rapolla", "Rapone", "Rionero in Vulture", "Ripacandida", "Ruvo del Monte", "San Fele", "Venosa"],
+            "A2": ["Balvano", "Baragiano", "Bella", "Brienza", "Castelgrande", "Muro Lucano", "Picerno", "Ruoti", "Sant' Angelo Le Fratte", "Satriano di Lucania", "Savoia di Lucania", "Tito", "Vietri di Potenza"],
+            "B": ["Abriola", "Accettura", "Acerenza", "Albano di Lucania", "Anzi", "Avigliano", "Banzi", "Brindisi Montagna", "Calciano", "Calvello", "Campomaggiore", "Cancellara", "Castelmezzano", "Ferrandina", "Filiano", "Forenza", "Garaguso", "Genzano di Lucania", "Grassano", "Grottole", "Irsina", "Laurenzana", "Matera", "Miglionico", "Oppido Lucano", "Pietragalla", "Pietrapertosa", "Pignola", "Pomarico", "Potenza", "Salandra", "San Chirico Nuovo", "San Mauro Forte", "Tolve", "Tricarico", "Trivigno", "Vaglio Basilicata"],
+            "C": ["Aliano", "Armento", "Calvera", "Carbone", "Castronuovo di Sant' Andrea", "Cersosimo", "Chiaromonte", "Cirigliano", "Colobraro", "Corleto Perticara", "Episcopia", "Fardella", "Francavilla in Sinni", "Gallicchio", "Gorgoglione", "Grumento Nova", "Guardia Perticara", "Marsico Nuovo", "Marsicovetere", "Missanello", "Moliterno", "Montemurro", "Noepoli", "Paterno", "Roccanova", "San Chirico Raparo", "San Costantino A.", "San Giorgio Lucano", "San Martino d'Agri", "San Paolo Albanese", "San Severino Lucano", "Sant' Arcangelo", "Sarconi", "Senise", "Spinoso", "Stigliano", "Teana", "Terranova di Pollino", "Tramutola", "Tursi", "Valsinni", "Viggiano"],
+            "D": ["Castelluccio Inferiore", "Castelluccio Superiore", "Castelsaraceno", "Lagonegro", "Latronico", "Lauria", "Maratea", "Nemoli", "Rivello", "Rotonda", "Trecchina", "Viggianello"],
+            "E1": ["Craco", "Montalbano Jonico", "Nova Siri", "Policoro", "Rotondella", "Scanzano Jonico"],
+            "E2": ["Bernalda", "Montescaglioso", "Pisticci"]
+        };
+
         const colors = {
             "Verde (Assente)": "#008000",
             "Giallo (Ordinario)": "#FFFF00",
             "Arancione (Moderato)": "#FFA500",
             "Rosso (Elevato)": "#FF0000"
         };
+
         const inputsDiv = document.getElementById("inputs");
 
-        bases.forEach(base => {
+        for (const base in comuniPerBase) {
             let selectOggi = `<select id="${base}-oggi">`;
             let selectDomani = `<select id="${base}-domani">`;
 
             for (const [label, color] of Object.entries(colors)) {
-                selectOggi += `<option value="<span class="math-inline">\{color\}"\></span>{label}</option>`;
-                selectDomani += `<option value="<span class="math-inline">\{color\}"\></span>{label}</option>`;
+                selectOggi += `<option value="${color}">${label}</option>`;
+                selectDomani += `<option value="${color}">${label}</option>`;
             }
             selectOggi += "</select>";
             selectDomani += "</select>";
@@ -56,17 +66,7 @@
                     ${selectOggi}
                     ${selectDomani}
                 </div>`;
-        });
-
-        const baseToSvgId = {
-            "Matera": "Matera",
-            "Potenza": "Potenza",
-            "Lauria": "Lauria",
-            "Melfi": "Melfi",
-            "Pisticci": "Pisticci",
-            "Venosa": "Venosa",
-            "Tricarico": "Tricarico_1"
-        };
+        }
 
         function generateMaps() {
             const mapOggi = document.getElementById("map-oggi");
@@ -74,44 +74,42 @@
             mapOggi.innerHTML = "<h3>Oggi</h3>";
             mapDomani.innerHTML = "<h3>Domani</h3>";
 
-            fetch('comuni.svg')
-                .then(response => response.text())
-                .then(svg => {
-                    // Aggiungi viewBox all'SVG
-                    const parser = new DOMParser();
-                    const doc = parser.parseFromString(svg, 'image/svg+xml');
-                    const svgElement = doc.querySelector('svg');
-                    svgElement.setAttribute('viewBox', '0 0 1000 1000'); // Regola i valori della viewBox
+            const svg = `
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 700">
+                    </svg>
+            `;
 
-                    // Crea una copia dell'SVG per la mappa "Domani"
-                    const svgDomani = svgElement.cloneNode(true);
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(svg, 'image/svg+xml');
+            const svgElement = doc.querySelector('svg');
+            svgElement.setAttribute('viewBox', '0 0 1000 1000');
 
-                    mapOggi.innerHTML += new XMLSerializer().serializeToString(doc.documentElement);
-                    mapDomani.innerHTML += new XMLSerializer().serializeToString(svgDomani);
+            const svgDomani = svgElement.cloneNode(true);
 
-                    bases.forEach(base => {
-                        const colorOggi = document.getElementById(`${base}-oggi`).value;
-                        const colorDomani = document.getElementById(`${base}-domani`).value;
+            mapOggi.innerHTML += new XMLSerializer().serializeToString(doc.documentElement);
+            mapDomani.innerHTML += new XMLSerializer().serializeToString(svgDomani);
 
-                        const svgId = baseToSvgId[base];
-                        const areaOggi = document.getElementById(svgId);
-                        const areaDomani = document.getElementById(svgId);
+            for (const base in comuniPerBase) {
+                const colorOggi = document.getElementById(`${base}-oggi`).value;
+                const colorDomani = document.getElementById(`${base}-domani`).value;
 
-                        if (areaOggi) {
-                            areaOggi.style.fill = colorOggi;
-                        } else {
-                            console.log(`Elemento ${svgId} non trovato nella mappa Oggi`);
-                        }
+                comuniPerBase[base].forEach(comuneId => {
+                    const areaOggi = document.getElementById(comuneId);
+                    const areaDomani = mapDomani.querySelector(`#${comuneId}`);
 
-                        // Seleziona gli elementi nella copia dell'SVG per la mappa "Domani"
-                        const areaDomaniCopy = mapDomani.querySelector(`#${svgId}`);
-                        if (areaDomaniCopy) {
-                            areaDomaniCopy.style.fill = colorDomani;
-                        } else {
-                            console.log(`Elemento ${svgId} non trovato nella mappa Domani`);
-                        }
-                    });
+                    if (areaOggi) {
+                        areaOggi.style.fill = colorOggi;
+                    } else {
+                        console.log(`Elemento ${comuneId} non trovato nella mappa Oggi`);
+                    }
+
+                    if (areaDomani) {
+                        areaDomani.style.fill = colorDomani;
+                    } else {
+                        console.log(`Elemento ${comuneId} non trovato nella mappa Domani`);
+                    }
                 });
+            }
         }
 
         function generatePDF() {
@@ -120,14 +118,24 @@
             doc.text("Bollettino di Criticità", 10, 10);
             let y = 20;
 
-            bases.forEach(base => {
+            for (const base in comuniPerBase) {
                 const oggiText = document.getElementById(`${base}-oggi`).selectedOptions[0].text;
                 const domaniText = document.getElementById(`${base}-domani`).selectedOptions[0].text;
                 doc.text(`${base}: Oggi - ${oggiText}, Domani - ${domaniText}`, 10, y);
                 y += 10;
-            });
+            }
 
-            // Aggiungi le mappe colorate al PDF
             html2canvas(document.getElementById('map-oggi')).then(canvasOggi => {
                 const imgDataOggi = canvasOggi.toDataURL('image/png');
                 doc.addImage(imgDataOggi, 'PNG', 10, y, 100, 75);
+            });
+            html2canvas(document.getElementById('map-domani')).then(canvasDomani => {
+                const imgDataDomani = canvasDomani.toDataURL('image/png');
+                doc.addImage(imgDataDomani, 'PNG', 120, y, 100, 75);
+            });
+
+            doc.save("BollettinoCriticità.pdf");
+        }
+    </script>
+</body>
+</html>
