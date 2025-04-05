@@ -31,7 +31,7 @@
 
         .rischio-content {
             padding: 10px;
-            display: none; /* Inizialmente nascosto */
+            display: none;
         }
 
         .zona-input {
@@ -56,7 +56,7 @@
         }
 
         .map {
-            width: 30%; /* Modificato per adattare 3 mappe */
+            width: 45%;
             height: 400px;
             border: 1px solid #000;
             padding: 10px;
@@ -74,73 +74,57 @@
     <div class="container">
         <h2>Bollettini di Criticità</h2>
 
+        <div class="zona-input">
+            <label for="zona-A1-oggi">Zona A1 (Oggi):</label>
+            <select id="zona-A1-oggi" name="zona-A1-oggi">
+                <option value="#008000">Verde (Assente)</option>
+                <option value="#FFFF00">Giallo (Ordinario)</option>
+                <option value="#FFA500">Arancione (Moderato)</option>
+                <option value="#FF0000">Rosso (Elevato)</option>
+            </select>
+            <label for="zona-A1-domani">Zona A1 (Domani):</label>
+            <select id="zona-A1-domani" name="zona-A1-domani">
+                <option value="#008000">Verde (Assente)</option>
+                <option value="#FFFF00">Giallo (Ordinario)</option>
+                <option value="#FFA500">Arancione (Moderato)</option>
+                <option value="#FF0000">Rosso (Elevato)</option>
+            </select>
+        </div>
         <div class="rischio-section">
             <div class="rischio-header" onclick="toggleRischio('idro')">Criticità Idrogeologica</div>
             <div class="rischio-content" id="idro">
-                <div class="zona-input">
-                    <label for="zona-A1-idro">Zona A1:</label>
-                    <select id="zona-A1-idro" name="zona-A1-idro">
-                        <option value="#008000">Verde (Assente)</option>
-                        <option value="#FFFF00">Giallo (Ordinario)</option>
-                        <option value="#FFA500">Arancione (Moderato)</option>
-                        <option value="#FF0000">Rosso (Elevato)</option>
-                    </select>
                 </div>
-                <div class="zona-input">
-                    <label for="zona-E2-idro">Zona E2:</label>
-                    <select id="zona-E2-idro" name="zona-E2-idro">
-                        <option value="#008000">Verde (Assente)</option>
-                        <option value="#FFFF00">Giallo (Ordinario)</option>
-                        <option value="#FFA500">Arancione (Moderato)</option>
-                        <option value="#FF0000">Rosso (Elevato)</option>
-                    </select>
-                </div>
-            </div>
         </div>
 
         <div class="rischio-section">
             <div class="rischio-header" onclick="toggleRischio('temporali')">Criticità Idrogeologica per temporali</div>
             <div class="rischio-content" id="temporali">
-                <div class="zona-input">
-                    <label for="zona-E2-temporali">Zona E2:</label>
-                    <select id="zona-E2-temporali" name="zona-E2-temporali">
-                        <option value="#008000">Verde (Assente)</option>
-                        <option value="#FFFF00">Giallo (Ordinario)</option>
-                        <option value="#FFA500">Arancione (Moderato)</option>
-                        <option value="#FF0000">Rosso (Elevato)</option>
-                    </select>
                 </div>
-            </div>
         </div>
 
         <div class="rischio-section">
             <div class="rischio-header" onclick="toggleRischio('idrica')">Criticità Idrica</div>
             <div class="rischio-content" id="idrica">
-                <div class="zona-input">
-                    <label for="zona-E2-idrica">Zona E2:</label>
-                    <select id="zona-E2-idrica" name="zona-E2-idrica">
-                        <option value="#008000">Verde (Assente)</option>
-                        <option value="#FFFF00">Giallo (Ordinario)</option>
-                        <option value="#FFA500">Arancione (Moderato)</option>
-                        <option value="#FF0000">Rosso (Elevato)</option>
-                    </select>
                 </div>
-            </div>
         </div>
 
-        <button onclick="generateMaps('oggi')">Genera Mappe Oggi</button>
-        <button onclick="generateMaps('domani')">Genera Mappe Domani</button>
+        <label for="criticita-mappa">Seleziona criticità per la mappa:</label>
+        <select id="criticita-mappa" name="criticita-mappa">
+            <option value="idro">Idrogeologica</option>
+            <option value="temporali">Temporali</option>
+            <option value="idrica">Idrica</option>
+        </select>
+
+        <button onclick="generateMaps('oggi')">Genera Mappa Oggi</button>
+        <button onclick="generateMaps('domani')">Genera Mappa Domani</button>
         <button onclick="generatePDF()">Esporta PDF</button>
 
         <div class="maps-container">
-            <div id="map-idro" class="map">
-                <h3>Criticità Idrogeologica</h3>
+            <div id="map-oggi" class="map">
+                <h3>Mappa Oggi</h3>
             </div>
-            <div id="map-temporali" class="map">
-                <h3>Criticità Idrogeologica per temporali</h3>
-            </div>
-            <div id="map-idrica" class="map">
-                <h3>Criticità Idrica</h3>
+            <div id="map-domani" class="map">
+                <h3>Mappa Domani</h3>
             </div>
         </div>
     </div>
@@ -166,60 +150,32 @@
         }
 
         function generateMaps(giorno) {
-            const mapIdro = document.getElementById("map-idro");
-            const mapTemporali = document.getElementById("map-temporali");
-            const mapIdrica = document.getElementById("map-idrica");
-
-            mapIdro.innerHTML = `<h3>Criticità Idrogeologica (${giorno})</h3>`;
-            mapTemporali.innerHTML = `<h3>Criticità Idrogeologica per temporali (${giorno})</h3>`;
-            mapIdrica.innerHTML = `<h3>Criticità Idrica (${giorno})</h3>`;
+            const mapId = document.getElementById(giorno === 'oggi' ? 'map-oggi' : 'map-domani');
+            const criticitaSelezionata = document.getElementById('criticita-mappa').value;
+            mapId.innerHTML = `<h3>Mappa ${giorno} (${criticitaSelezionata})</h3>`;
 
             const svgUrl = 'https://raw.githubusercontent.com/Eatapples15/bollettinocom/main/comuni.svg';
 
             fetch(svgUrl)
                 .then(response => response.text())
                 .then(svg => {
-                    mapIdro.innerHTML += svg;
-                    mapTemporali.innerHTML += svg;
-                    mapIdrica.innerHTML += svg;
+                    mapId.innerHTML += svg;
 
                     for (const base in comuniPerBase) {
-                        const colorIdro = document.getElementById(`zona-${base}-idro`).value;
-                        const colorTemporali = document.getElementById(`zona-${base}-temporali`).value;
-                        const colorIdrica = document.getElementById(`zona-${base}-idrica`).value;
+                        const color = document.getElementById(`zona-${base}-${giorno}`).value;
 
                         comuniPerBase[base].forEach(comuneId => {
-                            const areeIdro = mapIdro.querySelectorAll(`#${comuneId}`);
-                            const areeTemporali = mapTemporali.querySelectorAll(`#${comuneId}`);
-                            const areeIdrica = mapIdrica.querySelectorAll(`#${comuneId}`);
-
-                            areeIdro.forEach(area => {
-                                area.style.fill = colorIdro;
-                            });
-                            areeTemporali.forEach(area => {
-                                area.style.fill = colorTemporali;
-                            });
-                            areeIdrica.forEach(area => {
-                                area.style.fill = colorIdrica;
+                            const aree = mapId.querySelectorAll(`#${comuneId}`);
+                            aree.forEach(area => {
+                                area.style.fill = color;
                             });
                         });
                     }
 
-                    const svgIdro = mapIdro.querySelector('svg');
-                    const svgTemporali = mapTemporali.querySelector('svg');
-                    const svgIdrica = mapIdrica.querySelector('svg');
-
-                    if (svgIdro) {
-                        svgIdro.style.width = '100%';
-                        svgIdro.style.height = '100%';
-                    }
-                    if (svgTemporali) {
-                        svgTemporali.style.width = '100%';
-                        svgTemporali.style.height = '100%';
-                    }
-                    if (svgIdrica) {
-                        svgIdrica.style.width = '100%';
-                        svgIdrica.style.height = '100%';
+                    const svgElement = mapId.querySelector('svg');
+                    if (svgElement) {
+                        svgElement.style.width = '100%';
+                        svgElement.style.height = '100%';
                     }
                 })
                 .catch(error => console.error('Error fetching SVG:', error));
