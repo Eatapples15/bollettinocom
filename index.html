@@ -114,7 +114,7 @@
             mapOggi.innerHTML = "<h3>Oggi</h3>";
             mapDomani.innerHTML = "<h3>Domani</h3>";
 
-            fetch('Map_of_municipalities_of_Basilicata_-_Italy.svg')
+            fetch('comuni.svg')
                 .then(response => response.text())
                 .then(svg => {
                     mapOggi.innerHTML += svg;
