@@ -83,8 +83,11 @@
                     const svgElement = doc.querySelector('svg');
                     svgElement.setAttribute('viewBox', '0 0 1000 1000'); // Regola i valori della viewBox
 
+                    // Crea una copia dell'SVG per la mappa "Domani"
+                    const svgDomani = svgElement.cloneNode(true);
+
                     mapOggi.innerHTML += new XMLSerializer().serializeToString(doc.documentElement);
-                    mapDomani.innerHTML += new XMLSerializer().serializeToString(doc.documentElement);
+                    mapDomani.innerHTML += new XMLSerializer().serializeToString(svgDomani);
 
                     bases.forEach(base => {
                         const colorOggi = document.getElementById(`${base}-oggi`).value;
@@ -95,7 +98,10 @@
                         const areaDomani = document.getElementById(svgId);
 
                         if (areaOggi) areaOggi.style.fill = colorOggi;
-                        if (areaDomani) areaDomani.style.fill = colorDomani;
+
+                        // Seleziona gli elementi nella copia dell'SVG per la mappa "Domani"
+                        const areaDomaniCopy = mapDomani.querySelector(`#${svgId}`);
+                        if (areaDomaniCopy) areaDomaniCopy.style.fill = colorDomani;
                     });
                 });
         }
