@@ -44,8 +44,8 @@
             let selectDomani = `<select id="${base}-domani">`;
 
             for (const [label, color] of Object.entries(colors)) {
-                selectOggi += `<option value="${color}">${label}</option>`;
-                selectDomani += `<option value="${color}">${label}</option>`;
+                selectOggi += `<option value="<span class="math-inline">\{color\}"\></span>{label}</option>`;
+                selectDomani += `<option value="<span class="math-inline">\{color\}"\></span>{label}</option>`;
             }
             selectOggi += "</select>";
             selectDomani += "</select>";
@@ -65,7 +65,7 @@
             "Melfi": "Melfi",
             "Pisticci": "Pisticci",
             "Venosa": "Venosa",
-            "Tricarico": "Tricarico_1" // Aggiorna l'ID per Tricarico
+            "Tricarico": "Tricarico_1"
         };
 
         function generateMaps() {
@@ -97,11 +97,19 @@
                         const areaOggi = document.getElementById(svgId);
                         const areaDomani = document.getElementById(svgId);
 
-                        if (areaOggi) areaOggi.style.fill = colorOggi;
+                        if (areaOggi) {
+                            areaOggi.style.fill = colorOggi;
+                        } else {
+                            console.log(`Elemento ${svgId} non trovato nella mappa Oggi`);
+                        }
 
                         // Seleziona gli elementi nella copia dell'SVG per la mappa "Domani"
                         const areaDomaniCopy = mapDomani.querySelector(`#${svgId}`);
-                        if (areaDomaniCopy) areaDomaniCopy.style.fill = colorDomani;
+                        if (areaDomaniCopy) {
+                            areaDomaniCopy.style.fill = colorDomani;
+                        } else {
+                            console.log(`Elemento ${svgId} non trovato nella mappa Domani`);
+                        }
                     });
                 });
         }
@@ -122,16 +130,4 @@
             // Aggiungi le mappe colorate al PDF
             html2canvas(document.getElementById('map-oggi')).then(canvasOggi => {
                 const imgDataOggi = canvasOggi.toDataURL('image/png');
-                doc.addImage(imgDataOggi, 'PNG', 10, y, 100, 75); // Regola le coordinate e le dimensioni dell'immagine
-                y += 80;
-
-                html2canvas(document.getElementById('map-domani')).then(canvasDomani => {
-                    const imgDataDomani = canvasDomani.toDataURL('image/png');
-                    doc.addImage(imgDataDomani, 'PNG', 10, y, 100, 75); // Regola le coordinate e le dimensioni dell'immagine
-                    doc.save("bollettino_criticita.pdf");
-                });
-            });
-        }
-    </script>
-</body>
-</html>
+                doc.addImage(imgDataOggi, 'PNG', 10, y, 100, 75);
