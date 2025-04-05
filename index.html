@@ -114,7 +114,10 @@
             mapOggi.innerHTML = "<h3>Oggi</h3>";
             mapDomani.innerHTML = "<h3>Domani</h3>";
 
-            fetch('https://github.com/Eatapples15/bollettinocom/blob/main/comuni.svg') // Percorso corretto
+            // Modifica qui: Costruisci l'URL per ottenere il contenuto raw dell'SVG
+            const svgUrl = 'https://raw.githubusercontent.com/Eatapples15/bollettinocom/main/comuni.svg';
+
+            fetch(svgUrl)
                 .then(response => response.text())
                 .then(svg => {
                     mapOggi.innerHTML += svg;
@@ -125,11 +128,9 @@
                         const colorDomani = document.getElementById(`${base}-domani`).value;
 
                         comuniPerBase[base].forEach(comuneId => {
-                            // Seleziona tutti gli elementi con l'ID corrispondente all'interno della mappa
                             const areeOggi = mapOggi.querySelectorAll(`#${comuneId}`);
                             const areeDomani = mapDomani.querySelectorAll(`#${comuneId}`);
 
-                            // Applica il colore a tutti gli elementi trovati
                             areeOggi.forEach(area => {
                                 area.style.fill = colorOggi;
                             });
@@ -145,10 +146,18 @@
                     if (svgOggi) {
                         svgOggi.style.width = '100%';
                         svgOggi.style.height = '100%';
+
+                        // Aggiungi queste righe per centrare la mappa (se necessario)
+                        svgOggi.style.display = 'block';
+                        svgOggi.style.margin = 'auto';
                     }
                     if (svgDomani) {
                         svgDomani.style.width = '100%';
                         svgDomani.style.height = '100%';
+
+                        // Aggiungi queste righe per centrare la mappa (se necessario)
+                        svgDomani.style.display = 'block';
+                        svgDomani.style.margin = 'auto';
                     }
                 })
                 .catch(error => console.error('Error fetching SVG:', error));
