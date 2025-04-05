@@ -150,7 +150,42 @@
                         </tr>
                     </thead>
                     <tbody>
-                        </tbody>
+                        <tr>
+                            <td>A1</td>
+                            <td><select id="zona-A1-temporali-oggi"></select></td>
+                            <td><select id="zona-A1-temporali-domani"></select></td>
+                        </tr>
+                        <tr>
+                            <td>A2</td>
+                            <td><select id="zona-A2-temporali-oggi"></select></td>
+                            <td><select id="zona-A2-temporali-domani"></select></td>
+                        </tr>
+                        <tr>
+                            <td>B</td>
+                            <td><select id="zona-B-temporali-oggi"></select></td>
+                            <td><select id="zona-B-temporali-domani"></select></td>
+                        </tr>
+                        <tr>
+                            <td>C</td>
+                            <td><select id="zona-C-temporali-oggi"></select></td>
+                            <td><select id="zona-C-temporali-domani"></select></td>
+                        </tr>
+                        <tr>
+                            <td>D</td>
+                            <td><select id="zona-D-temporali-oggi"></select></td>
+                            <td><select id="zona-D-temporali-domani"></select></td>
+                        </tr>
+                        <tr>
+                            <td>E1</td>
+                            <td><select id="zona-E1-temporali-oggi"></select></td>
+                            <td><select id="zona-E1-temporali-domani"></select></td>
+                        </tr>
+                        <tr>
+                            <td>E2</td>
+                            <td><select id="zona-E2-temporali-oggi"></select></td>
+                            <td><select id="zona-E2-temporali-domani"></select></td>
+                        </tr>
+                    </tbody>
                 </table>
             </div>
         </div>
@@ -167,7 +202,42 @@
                         </tr>
                     </thead>
                     <tbody>
-                        </tbody>
+                        <tr>
+                            <td>A1</td>
+                            <td><select id="zona-A1-idrica-oggi"></select></td>
+                            <td><select id="zona-A1-idrica-domani"></select></td>
+                        </tr>
+                        <tr>
+                            <td>A2</td>
+                            <td><select id="zona-A2-idrica-oggi"></select></td>
+                            <td><select id="zona-A2-idrica-domani"></select></td>
+                        </tr>
+                        <tr>
+                            <td>B</td>
+                            <td><select id="zona-B-idrica-oggi"></select></td>
+                            <td><select id="zona-B-idrica-domani"></select></td>
+                        </tr>
+                        <tr>
+                            <td>C</td>
+                            <td><select id="zona-C-idrica-oggi"></select></td>
+                            <td><select id="zona-C-idrica-domani"></select></td>
+                        </tr>
+                        <tr>
+                            <td>D</td>
+                            <td><select id="zona-D-idrica-oggi"></select></td>
+                            <td><select id="zona-D-idrica-domani"></select></td>
+                        </tr>
+                        <tr>
+                            <td>E1</td>
+                            <td><select id="zona-E1-idrica-oggi"></select></td>
+                            <td><select id="zona-E1-idrica-domani"></select></td>
+                        </tr>
+                        <tr>
+                            <td>E2</td>
+                            <td><select id="zona-E2-idrica-oggi"></select></td>
+                            <td><select id="zona-E2-idrica-domani"></select></td>
+                        </tr>
+                    </tbody>
                 </table>
             </div>
         </div>
@@ -193,7 +263,106 @@
     </div>
 
     <script>
-        // ... (resto dello script JavaScript) ...
+        const comuniPerBase = {
+            "A1": ["nome_comune_A1_nell_svg"],
+            "A2": ["nome_comune_A2_nell_svg"],
+            "B": ["nome_comune_B_nell_svg"],
+            "C": ["nome_comune_C_nell_svg"],
+            "D": ["nome_comune_D_nell_svg"],
+            "E1": ["nome_comune_E1_nell_svg"],
+            "E2": ["nome_comune_E2_nell_svg"]
+        };
+
+        function toggleRischio(id) {
+            const content = document.getElementById(id);
+            if (content.style.display === "none") {
+                content.style.display = "block";
+            } else {
+                content.style.display = "none";
+            }
+        }
+
+        function populateSelects() {
+            const colors = ["#008000", "#FFFF00", "#FFA500", "#FF0000"];
+            const colorNames = ["Verde (Assente)", "Giallo (Ordinario)", "Arancione (Moderato)", "Rosso (Elevato)"];
+
+            const criticità = ["idro", "temporali", "idrica"];
+            const giorni = ["oggi", "domani"];
+            const basi = ["A1", "A2", "B", "C", "D", "E1", "E2"];
+
+            criticità.forEach(c => {
+                giorni.forEach(g => {
+                    basi.forEach(b => {
+                        const selectId = `zona-${b}-${c}-${g}`;
+                        const select = document.getElementById(selectId);
+                        if (select) {
+                            colors.forEach((color, index) => {
+                                const option = document.createElement("option");
+                                option.value = color;
+                                option.text = colorNames[index];
+                                select.appendChild(option);
+                            });
+                        }
+                    });
+                });
+            });
+        }
+
+        function updateMaps() {
+            const criticitaSelezionata = document.getElementById('criticita-mappa').value;
+            const mapOggi = document.getElementById('map-oggi');
+            const mapDomani = document.getElementById('map-domani');
+
+            mapOggi.innerHTML = `<h3>Mappa Oggi (${criticitaSelezionata})</h3>`;
+            mapDomani.innerHTML = `<h3>Mappa Domani (${criticitaSelezionata})</h3>`;
+
+            const svgUrl = 'https://raw.githubusercontent.com/Eatapples15/bollettinocom/main/comuni.svg';
+
+            fetch(svgUrl)
+                .then(response => response.text())
+                .then(svg => {
+                    mapOggi.innerHTML += svg;
+                    mapDomani.innerHTML += svg;
+
+                    for (const base in comuniPerBase) {
+                        const colorOggi = document.getElementById(`zona-${base}-${criticitaSelezionata}-oggi`).value;
+                        const colorDomani = document.getElementById(`zona-${base}-${criticitaSelezionata}-domani`).value;
+
+                        comuniPerBase[base].forEach(comuneId => {
+                            const areeOggi = mapOggi.querySelectorAll(`#${comuneId}`);
+                            const areeDomani = mapDomani.querySelectorAll(`#${comuneId}`);
+
+                            areeOggi.forEach(area => {
+                                area.style.fill = colorOggi;
+                            });
+
+                            areeDomani.forEach(area => {
+                                area.style.fill = colorDomani;
+                            });
+                        });
+                    }
+
+                    const svgOggi = mapOggi.querySelector('svg');
+                    const svgDomani = mapDomani.querySelector('svg');
+
+                    if (svgOggi) {
+                        svgOggi.style.width = '100%';
+                        svgOggi.style.height = '100%';
+                    }
+
+                    if (svgDomani) {
+                        svgDomani.style.width = '100%';
+                        svgDomani.style.height = '100%';
+                    }
+                })
+                .catch(error => console.error('Error fetching SVG:', error));
+        }
+
+        function generatePDF() {
+            // ... (la funzione generatePDF rimane invariata) ...
+        }
+
+        populateSelects();
     </script>
 </body>
 
