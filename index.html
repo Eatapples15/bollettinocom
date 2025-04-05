@@ -67,6 +67,18 @@
             width: 100%;
             height: 100%;
         }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th,
+        td {
+            border: 1px solid #ccc;
+            padding: 8px;
+            text-align: left;
+        }
     </style>
 </head>
 
@@ -74,38 +86,90 @@
     <div class="container">
         <h2>Bollettini di Criticità</h2>
 
-        <div class="zona-input">
-            <label for="zona-A1-oggi">Zona A1 (Oggi):</label>
-            <select id="zona-A1-oggi" name="zona-A1-oggi">
-                <option value="#008000">Verde (Assente)</option>
-                <option value="#FFFF00">Giallo (Ordinario)</option>
-                <option value="#FFA500">Arancione (Moderato)</option>
-                <option value="#FF0000">Rosso (Elevato)</option>
-            </select>
-            <label for="zona-A1-domani">Zona A1 (Domani):</label>
-            <select id="zona-A1-domani" name="zona-A1-domani">
-                <option value="#008000">Verde (Assente)</option>
-                <option value="#FFFF00">Giallo (Ordinario)</option>
-                <option value="#FFA500">Arancione (Moderato)</option>
-                <option value="#FF0000">Rosso (Elevato)</option>
-            </select>
-        </div>
         <div class="rischio-section">
             <div class="rischio-header" onclick="toggleRischio('idro')">Criticità Idrogeologica</div>
             <div class="rischio-content" id="idro">
-                </div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Base</th>
+                            <th>Oggi</th>
+                            <th>Domani</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>A1</td>
+                            <td><select id="zona-A1-idro-oggi"></select></td>
+                            <td><select id="zona-A1-idro-domani"></select></td>
+                        </tr>
+                        <tr>
+                            <td>A2</td>
+                            <td><select id="zona-A2-idro-oggi"></select></td>
+                            <td><select id="zona-A2-idro-domani"></select></td>
+                        </tr>
+                        <tr>
+                            <td>B</td>
+                            <td><select id="zona-B-idro-oggi"></select></td>
+                            <td><select id="zona-B-idro-domani"></select></td>
+                        </tr>
+                        <tr>
+                            <td>C</td>
+                            <td><select id="zona-C-idro-oggi"></select></td>
+                            <td><select id="zona-C-idro-domani"></select></td>
+                        </tr>
+                        <tr>
+                            <td>D</td>
+                            <td><select id="zona-D-idro-oggi"></select></td>
+                            <td><select id="zona-D-idro-domani"></select></td>
+                        </tr>
+                        <tr>
+                            <td>E1</td>
+                            <td><select id="zona-E1-idro-oggi"></select></td>
+                            <td><select id="zona-E1-idro-domani"></select></td>
+                        </tr>
+                        <tr>
+                            <td>E2</td>
+                            <td><select id="zona-E2-idro-oggi"></select></td>
+                            <td><select id="zona-E2-idro-domani"></select></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
 
         <div class="rischio-section">
             <div class="rischio-header" onclick="toggleRischio('temporali')">Criticità Idrogeologica per temporali</div>
             <div class="rischio-content" id="temporali">
-                </div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Base</th>
+                            <th>Oggi</th>
+                            <th>Domani</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        </tbody>
+                </table>
+            </div>
         </div>
 
         <div class="rischio-section">
             <div class="rischio-header" onclick="toggleRischio('idrica')">Criticità Idrica</div>
             <div class="rischio-content" id="idrica">
-                </div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Base</th>
+                            <th>Oggi</th>
+                            <th>Domani</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        </tbody>
+                </table>
+            </div>
         </div>
 
         <label for="criticita-mappa">Seleziona criticità per la mappa:</label>
@@ -130,60 +194,7 @@
     </div>
 
     <script>
-        const comuniPerBase = {
-            "A1": ["nome_comune_A1_nell_svg"],
-            "A2": ["nome_comune_A2_nell_svg"],
-            "B": ["nome_comune_B_nell_svg"],
-            "C": ["nome_comune_C_nell_svg"],
-            "D": ["nome_comune_D_nell_svg"],
-            "E1": ["nome_comune_E1_nell_svg"],
-            "E2": ["nome_comune_E2_nell_svg"]
-        };
-
-        function toggleRischio(id) {
-            const content = document.getElementById(id);
-            if (content.style.display === "none") {
-                content.style.display = "block";
-            } else {
-                content.style.display = "none";
-            }
-        }
-
-        function generateMaps(giorno) {
-            const mapId = document.getElementById(giorno === 'oggi' ? 'map-oggi' : 'map-domani');
-            const criticitaSelezionata = document.getElementById('criticita-mappa').value;
-            mapId.innerHTML = `<h3>Mappa ${giorno} (${criticitaSelezionata})</h3>`;
-
-            const svgUrl = 'https://raw.githubusercontent.com/Eatapples15/bollettinocom/main/comuni.svg';
-
-            fetch(svgUrl)
-                .then(response => response.text())
-                .then(svg => {
-                    mapId.innerHTML += svg;
-
-                    for (const base in comuniPerBase) {
-                        const color = document.getElementById(`zona-${base}-${giorno}`).value;
-
-                        comuniPerBase[base].forEach(comuneId => {
-                            const aree = mapId.querySelectorAll(`#${comuneId}`);
-                            aree.forEach(area => {
-                                area.style.fill = color;
-                            });
-                        });
-                    }
-
-                    const svgElement = mapId.querySelector('svg');
-                    if (svgElement) {
-                        svgElement.style.width = '100%';
-                        svgElement.style.height = '100%';
-                    }
-                })
-                .catch(error => console.error('Error fetching SVG:', error));
-        }
-
-        function generatePDF() {
-            // ... (la funzione generatePDF rimane invariata) ...
-        }
+        // ... (resto dello script JavaScript) ...
     </script>
 </body>
 
