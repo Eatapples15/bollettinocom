@@ -75,8 +75,14 @@
             fetch('comuni.svg')
                 .then(response => response.text())
                 .then(svg => {
-                    mapOggi.innerHTML += svg;
-                    mapDomani.innerHTML += svg;
+                    // Aggiungi viewBox all'SVG
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(svg, 'image/svg+xml');
+                    const svgElement = doc.querySelector('svg');
+                    svgElement.setAttribute('viewBox', '0 0 1000 1000'); // Regola i valori della viewBox
+
+                    mapOggi.innerHTML += new XMLSerializer().serializeToString(doc.documentElement);
+                    mapDomani.innerHTML += new XMLSerializer().serializeToString(doc.documentElement);
 
                     bases.forEach(base => {
                         const colorOggi = document.getElementById(`${base}-oggi`).value;
