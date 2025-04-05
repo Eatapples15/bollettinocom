@@ -1,499 +1,246 @@
 <!DOCTYPE html>
- <html lang="it">
- 
+<html lang="it">
 
- <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Bollettini di Criticità</title>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-  <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
-  <style>
-  body {
-  font-family: Arial, sans-serif;
-  margin: 20px;
-  }
- 
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bollettini di Criticità</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
 
-  .container {
-  max-width: 2000px;
-  margin: auto;
-  }
- 
+        .container {
+            max-width: 2000px;
+            margin: auto;
+        }
 
-  .rischio-section {
-  margin-bottom: 20px;
-  border: 1px solid #ccc;
-  padding: 10px;
-  }
- 
+        .rischio-section {
+            margin-bottom: 20px;
+            border: 1px solid #ccc;
+            padding: 10px;
+        }
 
-  .rischio-header {
-  background-color: #f0f0f0;
-  padding: 10px;
-  cursor: pointer;
-  }
- 
+        .rischio-header {
+            background-color: #f0f0f0;
+            padding: 10px;
+            cursor: pointer;
+        }
 
-  .rischio-content {
-  padding: 10px;
-  display: none;
-  }
- 
+        .rischio-content {
+            padding: 10px;
+            display: none;
+        }
 
-  .zona-input {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 10px;
-  }
- 
+        .zona-input {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
 
-  .zona-input label {
-  font-weight: bold;
-  }
- 
+        .zona-input label {
+            font-weight: bold;
+        }
 
-  select {
-  padding: 5px;
-  }
- 
+        select {
+            padding: 5px;
+        }
 
-  .maps-container {
-  display: flex;
-  justify-content: space-between;
-  margin-top: 20px;
-  }
- 
+        .maps-container {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
 
-  .map {
-  width: 100%;
-  height: 400px;
-  border: 1px solid #000;
-  padding: 10px;
-  overflow: auto;
-  display: none;
-  }
- 
+        .map {
+            width: 100%;
+            height: 400px;
+            border: 1px solid #000;
+            padding: 10px;
+            overflow: auto;
+            display: none;
+        }
 
-  .map svg {
-  width: 100%;
-  height: 100%;
-  }
- 
+        .map svg {
+            width: 100%;
+            height: 100%;
+        }
 
-  table {
-  width: 100%;
-  border-collapse: collapse;
-  }
- 
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
 
-  th,
-  td {
-  border: 1px solid #ccc;
-  padding: 8px;
-  text-align: left;
-  }
- 
+        th,
+        td {
+            border: 1px solid #ccc;
+            padding: 8px;
+            text-align: left;
+        }
 
-  .map-buttons {
-  text-align: center;
-  margin-bottom: 10px;
-  }
- 
+        .map-buttons {
+            text-align: center;
+            margin-bottom: 10px;
+        }
 
-  .map-buttons button {
-  padding: 5px 10px;
-  margin: 0 5px;
-  cursor: pointer;
-  }
-  </style>
- </head>
- 
+        .map-buttons button {
+            padding: 5px 10px;
+            margin: 0 5px;
+            cursor: pointer;
+        }
+    </style>
+</head>
 
- <body>
-  <div class="container">
-  <h2>Bollettini di Criticità</h2>
- 
+<body>
+    <div class="container">
+        <h2>Bollettini di Criticità</h2>
 
-  <div class="rischio-section">
-  <div class="rischio-header" onclick="toggleRischio('idro')">Criticità Idrogeologica</div>
-  <div class="rischio-content" id="idro">
-  <table>
-  <thead>
-  <tr>
-  <th>Base</th>
-  <th>Oggi</th>
-  <th>Domani</th>
-  </tr>
-  </thead>
-  <tbody>
-  <tr>
-  <td>A1</td>
-  <td><select id="zona-A1-idro-oggi"></select></td>
-  <td><select id="zona-A1-idro-domani"></select></td>
-  </tr>
-  <tr>
-  <td>A2</td>
-  <td><select id="zona-A2-idro-oggi"></select></td>
-  <td><select id="zona-A2-idro-domani"></select></td>
-  </tr>
-  <tr>
-  <td>B</td>
-  <td><select id="zona-B-idro-oggi"></select></td>
-  <td><select id="zona-B-idro-domani"></select></td>
-  </tr>
-  <tr>
-  <td>C</td>
-  <td><select id="zona-C-idro-oggi"></select></td>
-  <td><select id="zona-C-idro-domani"></select></td>
-  </tr>
-  <tr>
-  <td>D</td>
-  <td><select id="zona-D-idro-oggi"></select></td>
-  <td><select id="zona-D-domani"></select></td>
-  </tr>
-  <tr>
-  <td>E1</td>
-  <td><select id="zona-E1-idro-oggi"></select></td>
-  <td><select id="zona-E1-idro-domani"></select></td>
-  </tr>
-  <tr>
-  <td>E2</td>
-  <td><select id="zona-E2-oggi"></select></td>
-  <td><select id="zona-E2-domani"></select></td>
-  </tr>
-  </tbody>
-  </table>
-  </div>
-  </div>
- 
+        <label for="criticita-mappa">Seleziona criticità per la mappa:</label>
+        <select id="criticita-mappa" name="criticita-mappa">
+            <option value="idro">Idrogeologica</option>
+            <option value="temporali">Temporali</option>
+            <option value="idrica">Idrica</option>
+        </select>
 
-  <div class="rischio-section">
-  <div class="rischio-header" onclick="toggleRischio('temporali')">Criticità Idrogeologica per temporali</div>
-  <div class="rischio-content" id="temporali">
-  <table>
-  <thead>
-  <tr>
-  <th>Base</th>
-  <th>Oggi</th>
-  <th>Domani</th>
-  </tr>
-  </thead>
-  <tbody>
-  <tr>
-  <td>A1</td>
-  <td><select id="zona-A1-temporali-oggi"></select></td>
-  <td><select id="zona-A1-temporali-domani"></select></td>
-  </tr>
-  <tr>
-  <td>A2</td>
-  <td><select id="zona-A2-temporali-oggi"></select></td>
-  <td><select id="zona-A2-temporali-domani"></select></td>
-  </tr>
-  <tr>
-  <td>B</td>
-  <td><select id="zona-B-temporali-oggi"></select></td>
-  <td><select id="zona-B-temporali-domani"></select></td>
-  </tr>
-  <tr>
-  <td>C</td>
-  <td><select id="zona-C-temporali-oggi"></select></td>
-  <td><select id="zona-C-temporali-domani"></select></td>
-  </tr>
-  <tr>
-  <td>D</td>
-  <td><select id="zona-D-temporali-oggi"></select></td>
-  <td><select id="zona-D-temporali-domani"></select></td>
-  </tr>
-  <tr>
-  <td>E1</td>
-  <td><select id="zona-E1-temporali-oggi"></select></td>
-  <td><select id="zona-E1-temporali-domani"></select></td>
-  </tr>
-  <tr>
-  <td>E2</td>
-  <td><select id="zona-E2-temporali-oggi"></select></td>
-  <td><select id="zona-E2-temporali-domani"></select></td>
-  </tr>
-  </tbody>
-  </table>
-  </div>
-  </div>
- 
+        <button onclick="mostraMappa()">Mostra Mappa</button>
+        <button onclick="generatePDF()">Esporta PDF</button>
 
-  <div class="rischio-section">
-  <div class="rischio-header" onclick="toggleRischio('idrica')">Criticità Idrica</div>
-  <div class="rischio-content" id="idrica">
-  <table>
-  <thead>
-  <tr>
-  <th>Base</th>
-  <th>Oggi</th>
-  <th>Domani</th>
-  </tr>
-  </thead>
-  <tbody>
-  <tr>
-  <td>A1</td>
-  <td><select id="zona-A1-idrica-oggi"></select></td>
-  <td><select id="zona-A1-idrica-domani"></select></td>
-  </tr>
-  <tr>
-  <td>A2</td>
-  <td><select id="zona-A2-idrica-oggi"></select></td>
-  <td><select id="zona-A2-idrica-domani"></select></td>
-  </tr>
-  <tr>
-  <td>B</td>
-  <td><select id="zona-B-idrica-oggi"></select></td>
-  <td><select id="zona-B-idrica-domani"></select></td>
-  </tr>
-  <tr>
-  <td>C</td>
-  <td><select id="zona-C-idrica-oggi"></select></td>
-  <td><select id="zona-C-idrica-domani"></select></td>
-  </tr>
-  <tr>
-  <td>D</td>
-  <td><select id="zona-D-idrica-oggi"></select></td>
-  <td><select id="zona-D-idrica-domani"></select></td>
-  </tr>
-  <tr>
-  <td>E1</td>
-  <td><select id="zona-E1-idrica-oggi"></select></td>
-  <td><select id="zona-E1-idrica-domani"></select></td>
-  </tr>
-  <tr>
-  <td>E2</td>
-  <td><select id="zona-E2-idrica-oggi"></select></td>
-  <td><select id="zona-E2-idrica-domani"></select></td>
-  </tr>
-  </tbody>
-  </table>
-  </div>
-  </div>
- 
+        <div class="map-buttons">
+            <button onclick="showMap('oggi')">Mappa Oggi</button>
+            <button onclick="showMap('domani')">Mappa Domani</button>
+        </div>
 
-  <label for="criticita-mappa">Seleziona criticità per la mappa:</label>
-  <select id="criticita-mappa" name="criticita-mappa">
-  <option value="idro">Idrogeologica</option>
-  <option value="temporali">Temporali</option>
-  <option value="idrica">Idrica</option>
-  </select>
- 
+        <div class="maps-container">
+            <div id="map-oggi" class="map">
+                <h3>Mappa Oggi</h3>
+            </div>
+            <div id="map-domani" class="map">
+                <h3>Mappa Domani</h3>
+            </div>
+        </div>
+    </div>
 
-  <button onclick="mostraMappa()">Mostra Mappa</button>
-  <button onclick="generatePDF()">Esporta PDF</button>
- 
+    <script>
+        const comuniPerBase = {
+            "A1": ["nome_comune_A1_nell_svg"],
+            "A2": ["nome_comune_A2_nell_svg"],
+            "B": ["nome_comune_B_nell_svg"],
+            "C": ["nome_comune_C_nell_svg"],
+            "D": ["nome_comune_D_nell_svg"],
+            "E1": ["nome_comune_E1_nell_svg"],
+            "E2": ["nome_comune_E2_nell_svg"]
+        };
 
-  <div class="map-buttons">
-  <button onclick="showMap('oggi')">Mappa Oggi</button>
-  <button onclick="showMap('domani')">Mappa Domani</button>
-  </div>
- 
+        // ... (Funzioni toggleRischio, populateSelects, generatePDF) ...
 
-  <div class="maps-container">
-  <div id="map-oggi" class="map">
-  <h3>Mappa Oggi</h3>
-  </div>
-  <div id="map-domani" class="map">
-  <h3>Mappa Domani</h3>
-  </div>
-  </div>
-  </div>
- 
+        function updateMaps() {
+            const criticitaSelezionata = document.getElementById('criticita-mappa').value;
+            const mapOggi = document.getElementById('map-oggi');
+            const mapDomani = document.getElementById('map-domani');
 
-  <script>
-  const comuniPerBase = {
-  "A1": ["nome_comune_A1_nell_svg"],
-  "A2": ["nome_comune_A2_nell_svg"],
-  "B": ["nome_comune_B_nell_svg"],
-  "C": ["nome_comune_C_nell_svg"],
-  "D": ["nome_comune_D_nell_svg"],
-  "E1": ["nome_comune_E1_nell_svg"],
-  "E2": ["nome_comune_E2_nell_svg"]
-  };
- 
+            mapOggi.innerHTML = `<h3>Mappa Oggi (${criticitaSelezionata})</h3>`;
+            mapDomani.innerHTML = `<h3>Mappa Domani (${criticitaSelezionata})</h3>`;
 
-  function toggleRischio(id) {
-  const content = document.getElementById(id);
-  if (content.style.display === "none") {
-  content.style.display = "block";
-  } else {
-  content.style.display = "none";
-  }
-  }
- 
+            const svgUrl = 'https://raw.githubusercontent.com/Eatapples15/bollettinocom/main/comuni.svg';
 
-  function populateSelects() {
-  const colors = ["#008000", "#FFFF00", "#FFA500", "#FF0000"];
-  const colorNames = ["Verde (Assente)", "Giallo (Ordinario)", "Arancione (Moderato)", "Rosso (Elevato)"];
- 
+            return fetch(svgUrl)
+                .then(response => response.text())
+                .then(svg => {
+                    mapOggi.innerHTML += svg;
+                    mapDomani.innerHTML += svg;
 
-  const criticità = ["idro", "temporali", "idrica"];
-  const giorni = ["oggi", "domani"];
-  const basi = ["A1", "A2", "B", "C", "D", "E1", "E2"];
- 
+                    for (const base in comuniPerBase) {
+                        const colorOggi = document.getElementById(`zona-${base}-${criticitaSelezionata}-oggi`).value;
+                        const colorDomani = document.getElementById(`zona-${base}-${criticitaSelezionata}-domani`).value;
 
-  criticità.forEach(c => {
-  giorni.forEach(g => {
-  basi.forEach(b => {
-  const selectId = `zona-${b}-${c}-${g}`;
-  const select = document.getElementById(selectId);
-  if (select) {
-  colors.forEach((color, index) => {
-  const option = document.createElement("option");
-  option.value = color;
-  option.text = colorNames[index];
-  select.appendChild(option);
-  });
-  }
-  });
-  });
-  });
-  }
- 
+                        comuniPerBase[base].forEach(comuneId => {
+                            const areeOggi = mapOggi.querySelectorAll(`#${comuneId}`);
+                            const areeDomani = mapDomani.querySelectorAll(`#${comuneId}`);
 
-  function updateMaps() {
-  const criticitaSelezionata = document.getElementById('criticita-mappa').value;
-  const mapOggi = document.getElementById('map-oggi');
-  const mapDomani = document.getElementById('map-domani');
- 
+                            areeOggi.forEach(area => {
+                                if (area) area.style.fill = colorOggi;
+                            });
 
-  mapOggi.innerHTML = `<h3>Mappa Oggi (${criticitaSelezionata})</h3>`;
-  mapDomani.innerHTML = `<h3>Mappa Domani (${criticitaSelezionata})</h3>`;
- 
+                            areeDomani.forEach(area => {
+                                if (area) area.style.fill = colorDomani;
+                            });
+                        });
+                    }
 
-  const svgUrl = 'https://raw.githubusercontent.com/Eatapples15/bollettinocom/main/comuni.svg';
- 
+                    const svgOggi = mapOggi.querySelector('svg');
+                    const svgDomani = mapDomani.querySelector('svg');
 
-  return fetch(svgUrl)
-  .then(response => response.text())
-  .then(svg => {
-  mapOggi.innerHTML += svg;
-  mapDomani.innerHTML += svg;
- 
+                    if (svgOggi) {
+                        svgOggi.style.width = '100%';
+                        svgOggi.style.height = '100%';
+                    }
 
-  for (const base in comuniPerBase) {
-  const colorOggi = document.getElementById(`zona-${base}-${criticitaSelezionata}-oggi`).value;
-  const colorDomani = document.getElementById(`zona-${base}-${criticitaSelezionata}-domani`).value;
- 
+                    if (svgDomani) {
+                        svgDomani.style.width = '100%';
+                        svgDomani.style.height = '100%';
+                    }
 
-  comuniPerBase[base].forEach(comuneId => {
-  const areeOggi = mapOggi.querySelectorAll(`#${comuneId}`);
-  const areeDomani = mapDomani.querySelectorAll(`#${comuneId}`);
- 
+                    return { mapOggiHTML: mapOggi.innerHTML, mapDomaniHTML: mapDomani.innerHTML };
+                })
+                .catch(error => {
+                    console.error('Error fetching SVG:', error);
+                    return { mapOggiHTML: '<p>Errore nel caricamento della mappa</p>', mapDomaniHTML: '<p>Errore nel caricamento della mappa</p>' };
+                });
+        }
 
-  areeOggi.forEach(area => {
-  area.style.fill = colorOggi;
-  });
- 
+        function mostraMappa() {
+            updateMaps().then(mapsHTML => {
+                const nuovaFinestra = window.open('', '_blank');
+                nuovaFinestra.document.write(`
+                    <html>
+                        <head>
+                            <title>Mappa Criticità</title>
+                            <style>
+                                html, body { margin: 0; padding: 0; height: 100%; }
+                                .maps-container {
+                                    display: flex;
+                                    justify-content: space-around;
+                                    height: 100%;
+                                }
+                                .map {
+                                    width: 48%;
+                                    height: 100%;
+                                }
+                                .map h3 { text-align: center; }
+                                .map svg { width: 100%; height: 100%; }
+                            </style>
+                        </head>
+                        <body>
+                            <div class="maps-container">
+                                <div class="map">
+                                    ${mapsHTML.mapOggiHTML}
+                                </div>
+                                <div class="map">
+                                    ${mapsHTML.mapDomaniHTML}
+                                </div>
+                            </div>
+                        </body>
+                    </html>
+                `);
+                nuovaFinestra.document.close();
+            });
+        }
 
-  areeDomani.forEach(area => {
-  area.style.fill = colorDomani;
-  });
-  });
-  }
- 
+        function showMap(giorno) {
+            const map = document.getElementById(`map-${giorno}`);
+            if (map.style.display === "block") {
+                map.style.display = "none";
+            } else {
+                map.style.display = "block";
+                updateMaps();
+            }
+        }
 
-  const svgOggi = mapOggi.querySelector('svg');
-  const svgDomani = mapDomani.querySelector('svg');
- 
+        populateSelects();
+    </script>
+</body>
 
-  if (svgOggi) {
-  svgOggi.style.width = '100%';
-  svgOggi.style.height = '100%';
-  }
- 
-
-  if (svgDomani) {
-  svgDomani.style.width = '100%';
-  svgDomani.style.height = '100%';
-  }
- 
-
-  return { mapOggiHTML: mapOggi.innerHTML, mapDomaniHTML: mapDomani.innerHTML };
-  })
-  .catch(error => {
-  console.error('Error fetching SVG:', error);
-  return { mapOggiHTML: '<p>Errore nel caricamento della mappa</p>', mapDomaniHTML: '<p>Errore nel caricamento della mappa</p>' };
-  });
-  }
- 
-
-  function generatePDF() {
-  const { jsPDF } = window.jspdf;
-  const doc = new jsPDF();
-  doc.text("Bollettino di Criticità", 10, 10);
-  let y = 20;
- 
-
-  const criticità = ["idro", "temporali", "idrica"];
-  const giorni = ["oggi", "domani"];
-  const basi = ["A1", "A2", "B", "C", "D", "E1", "E2"];
- 
-
-  criticità.forEach(c => {
-  doc.text(c.toUpperCase(), 10, y);
-  y += 10;
-  basi.forEach(b => {
-  giorni.forEach(g => {
-  const color = document.getElementById(`zona-${b}-${c}-${g}`).value;
-  const colorName = document.getElementById(`zona-${b}-${c}-${g}`).options[document.getElementById(`zona-${b}-${c}-${g}`).selectedIndex].text;
-  doc.text(`${b} (${g}): ${colorName}`, 20, y);
-  y += 10;
-  });
-  });
-  });
- 
-
-  doc.save("bollettino_criticita.pdf");
-  }
- 
-
-  function mostraMappa() {
-  updateMaps().then(mapsHTML => {
-  const nuovaFinestra = window.open('', '_blank');
-  nuovaFinestra.document.write(`
-  <html>
-  <head>
-  <title>Mappa Criticità</title>
-  <style>
-  html, body { margin: 0; padding: 0; height: 100%; }
-  .maps-container {
-  display: flex;
-  justify-content: space-around;
-  height: 100%;
-  }
-  .map {
-  width: 48%;
-  height: 100%;
-  }
-  .map h3 { text-align: center; }
-  .map svg { width: 100%; height: 100%; }
-  </style>
-  </head>
-  <body>
-  <div class="maps-container">
-  <div class="map">
-  ${mapsHTML.mapOggiHTML}
-  </div>
-  <div class="map">
-  ${mapsHTML.mapDomaniHTML}
-  </div>
-  </div>
-  </body>
-  </html>
-  `);
-  nuovaFinestra.document.close();
-  });
-  }
- 
-
-  populateSelects();
-  </script>
- </body>
- 
-
- </html>
+</html>
