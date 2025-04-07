@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bollettini di Criticità</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .container { max-width: 800px; margin: auto; }
+        .base { display: flex; justify-content: space-between; margin-bottom: 10px; }
+        button { margin-top: 20px; padding: 10px; cursor: pointer; }
+        .maps-container { display: flex; justify-content: space-between; margin-top: 20px; }
+        .map { width: 45%; height: 300px; border: 1px solid #000; padding: 10px; overflow: auto; }
+        .map svg { width: 100%; height: 100%; }
+        .map svg { transform: scale(0.8); transform-origin: top left; }
+
+        /* Stili per le basi e i comuni */
+        .base-container {
+            border: 1px solid #ccc;
+            padding: 10px;
+            margin: 10px 0;
+        }
+        .base-title {
+            font-size: 1.2em;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        .comune {
+            display: block;
+            margin: 2px 0;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Bollettini di Criticità</h2>
+        <div id="inputs"></div>
+        <button onclick="generateMaps()">Genera Mappe</button>
+        <button onclick="generatePDF()">Esporta PDF</button>
+        <div class="maps-container">
+            <div id="map-oggi" class="map"><h3>Oggi</h3></div>
+            <div id="map-domani" class="map"><h3>Domani</h3></div>
+        </div>
+
+        <div id="comuni-per-base">
+            </div>
+
+    </div>
+
+    <script>
+        const basi = ["Matera", "Potenza", "Lauria", "Melfi", "Pisticci", "Venosa", "Tricarico"];
+        const colori = {
+            "Verde (Assente)": "#008000",
+            "Giallo (Ordinario)": "#FFFF00",
+            "Arancione (Moderato)": "#FFA500",
+            "Rosso (Elevato)": "#FF0000"
+        };
+        const inputsDiv = document.getElementById("inputs");
+
+        basi.forEach(base => {
+            let selectOggi = `<select id="${base}-oggi">`;
+            let selectDomani = `<select id="${base}-domani">`;
+
+            for (const [label, color] of Object.entries(colori)) {
+                selectOggi += `<option value="${color}">${label}</option>`;
+                selectDomani += `<option value="${color}">${label}</option>`;
+            }
+            selectOggi += "</select>";
+            selectDomani += "</select>";
+
+            inputsDiv.innerHTML += `
+                <div class="base">
+                    <span>${base}</span>
+                    Oggi: ${selectOggi}
+                    Domani: ${selectDomani}
+                </div>`;
+        });
+
+        const baseToSvgId = {
+            "Matera": "Matera",
+            "Potenza": "Potenza",
+            "Lauria": "Lauria",
+            "Melfi": "Melfi",
+            "Pisticci": "Pisticci",
+            "Venosa": "Venosa",
+            "Tricarico": "Tricarico"
+        };
+
+        function generateMaps() {
+            const mapOggi = document.getElementById("map-oggi");
+            const mapDomani = document.getElementById("map-domani");
+            mapOggi.innerHTML = "<h3>Oggi</h3>";
+            mapDomani.innerHTML = "<h3>Domani</h3>";
+
+            fetch('comuni.svg')
+                .then(response => response.text())
+                .then(svg => {
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(svg, 'image/svg+xml');
+                    const svgElement = doc.querySelector('svg');
+                    svgElement.setAttribute('viewBox', '0 0 1000 1000'); // Regola se necessario
+
+                    const svgDomani = svgElement.cloneNode(true);
+
+                    mapOggi.innerHTML += new XMLSerializer().serializeToString(svgElement);
+                    mapDomani.innerHTML += new XMLSerializer().serializeToString(svgDomani);
+
+                    basi.forEach(base => {
+                        const colorOggi = document.getElementById(`${base}-oggi`).value;
+                        const colorDomani = document.getElementById(`${base}-domani`).value;
+
+                        const svgId = baseToSvgId[base];
+
+                        // Oggi
+                        const areaOggi = mapOggi.querySelector(`#${svgId}`);
+                        if (areaOggi) {
+                            if (areaOggi.tagName.toLowerCase() === 'g') {
+                                areaOggi.querySelectorAll('*').forEach(child => {
+                                    child.style.fill = colorOggi;
+                                });
+                            } else {
+                                areaOggi.style.fill = colorOggi;
+                            }
+                        }
+
+                        // Domani
+                        const areaDomani = mapDomani.querySelector(`#${svgId}`);
+                        if (areaDomani) {
+                            if (areaDomani.tagName.toLowerCase() === 'g') {
+                                areaDomani.querySelectorAll('*').forEach(child => {
+                                    child.style.fill = colorDomani;
+                                });
+                            } else {
+                                areaDomani.style.fill = colorDomani;
+                            }
+                        }
+                    });
+                });
+        }
+
+        function generatePDF() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            doc.text("Bollettino di Criticità", 10, 10);
+            let y = 20;
+
+            basi.forEach(base => {
+                const oggiText = document.getElementById(`${base}-oggi`).selectedOptions[0].text;
+                const domaniText = document.getElementById(`${base}-domani`).selectedOptions[0].text;
+                doc.text(`${base}: Oggi - ${oggiText}, Domani - ${domaniText}`, 10, y);
+                y += 10;
+            });
+
+            html2canvas(document.getElementById('map-oggi')).then(canvasOggi => {
+                const imgDataOggi = canvasOggi.toDataURL('image/png');
+                doc.addImage(imgDataOggi, 'PNG', 10, y, 100, 75);
+                y += 80;
+
+                html2canvas(document.getElementById('map-domani')).then(canvasDomani => {
+                    const imgDataDomani = canvasDomani.toDataURL('image/png');
+                    doc.addImage(imgDataDomani, 'PNG', 10, y, 100, 75);
+                    doc.save("bollettino_criticita.pdf");
+                });
+            });
+        }
+
+        // Dati dei comuni per base
+        const comuniPerBase = {
+            "Matera": [
+                { id: "Matera", nome: "Matera" },
+                { id: "Montescaglioso", nome: "Montescaglioso" },
+                { id: "Bernalda", nome: "Bernalda" },
+                { id: "Pisticci", nome: "Pisticci" },
+                { id: "Pomarico", nome: "Pomarico" },
+                { id: "Ferrandina", nome: "Ferrandina" },
+                { id: "Craco", nome: "Craco" },
+                { id: "MontalbanoJonico", nome: "Montalbano Jonico" },
+                { id: "NovaSiri", nome: "Nova Siri" },
+                { id: "Policoro", nome: "Policoro" },
+                { id: "Rotondella", nome: "Rotondella" },
+                { id: "ScanzanoJonico", nome: "Scanzano Jonico" },
+                {id: "Miglionico", nome: "Miglionico"},
+            ],
+            "Potenza": [
+                { id: "Potenza", nome: "Potenza" },
+                { id: "Abriola", nome: "Abriola" },
+                { id: "Accettura", nome: "Accettura" },
+                { id: "Acerenza", nome: "Acerenza" },
+                { id: "AlbanodiLucania", nome: "Albano di Lucania" },
+                { id: "Anzi", nome: "Anzi" },
+                { id: "Avigliano", nome: "Avigliano" },
+                { id: "Balvano", nome: "Balvano" },
+                { id: "Banzi", nome: "Banzi" },
+                { id: "Baragiano", nome: "Baragiano" },
+                { id: "Bella", nome: "Bella" },
+                { id: "BrindisiMontagna", nome: "Brindisi Montagna" },
+                { id: "Calciano", nome: "Calciano" },
+                { id: "Calvello", nome: "Calvello" },
+                { id: "Campomaggiore", nome: "Campomaggiore" },
+                { id: "Cancellara", nome: "Cancellara" },
+                { id: "Castelmezzano", nome: "Castelmezzano" },
+                {id:"Pietragalla", nome: "Pietragalla"},
+                {id:"Pietrapertosa", nome: "Pietrapertosa"},
+                {id:"Pignola", nome:"Pignola"},
+                {id:"Ruoti", nome":"Ruoti"},
+                {id:"SanChiricoNuovo", nome":"San Chirico Nuovo"},
+                {id:"Tito", nome":"Tito"},
+                {id:"Tolve", nome:"Tolve"},
+                {id:"Trivigno", nome:"Trivigno"},
+                {id:"VaglioBasilicata", nome:"Vaglio Basilicata"}
+            ],
+            "Lauria": [
+                { id: "Lauria", nome: "Lauria" },
+                { id: "CastelluccioInferiore", nome: "Castelluccio Inferiore" },
+                { id: "CastelluccioSuperiore", nome: "Castelluccio Superiore" },
+                { id: "Castelsaraceno", nome: "Castelsaraceno" },
+                { id: "Lagonegro", nome: "Lagonegro" },
+                { id: "Latronico", nome: "Latronico" },
+                { id: "Nemoli", nome: "Nemoli" },
+                { id: "Rivello", nome: "Rivello" },
+                { id: "Rotonda", nome: "Rotonda" },
+                { id: "Trecchina", nome: "Trecchina" },
+                { id: "Viggianello", nome: "Viggianello" },
+            ],
+            "Melfi": [
+                { id: "Melfi", nome: "Melfi" },
+                { id: "Atella", nome: "Atella" },
+                { id: "Barile", nome: "Barile" },
+                { id: "Filiano", nome: "Filiano" },
+                { id: "Forenza", nome: "Forenza" },
+                { id: "Ginestra", nome: "Ginestra" },
+                { id: "Lavello", nome: "Lavello" },
+                { id: "Maschito", nome: "Maschito" },
+                { id: "PalazzoSanGervasio", nome: "Palazzo San Gervasio" },
+                { id: "Pescopagano", nome: "Pescopagano" },
+                { id: "Rapolla", nome: "Rapolla" },
+                { id: "Rapone", nome: "Rapone" },
+                { id: "RioneroinVulture", nome: "Rionero in Vulture" },
+                { id: "Ripacandida", nome: "Ripacandida" },
+                { id: "Ruvo del Monte", nome: "Ruvo del Monte" },
+                { id: "San Fele", nome: "San Fele" },
+                { id: "Venosa", nome: "Venosa" },
+            ],
+            "Pisticci": [
+              {id:"Pisticci", nome:"Pisticci"}
+            ],
+            "Venosa": [
+                { id: "Venosa", nome: "Venosa" },
+            ],
+            "Tricarico": [
+                { id: "Tricarico", nome: "Tricarico" },
+                { id: "Aliano", nome: "Aliano" },
+                { id: "Armento", nome: "Armento" },
+                { id: "Calvera", nome: "Calvera" },
+                { id: "Carbone", nome: "Carbone" },
+                { id: "CastronuovodiSantAndrea", nome: "Castronuovo di Sant'Andrea" },
+                { id: "Cersosimo", nome: "Cersosimo" },
+                { id: "Chiaromonte", nome: "Chiaromonte" },
+                { id: "Cirigliano", nome: "Cirigliano" },
+                { id: "Colobraro", nome: "Colobraro" },
+                { id: "CorletoPerticara", nome: "Corleto Perticara" },
+                { id: "Episcopia", nome: "Episcopia" },
+                { id: "Fardella", nome: "Fardella" },
+                { id: "FrancavillainSinni", nome: "Francavilla in Sinni" },
+                { id: "Gallicchio", nome: "Gallicchio" },
+                { id: "Gorgoglione", nome: "Gorgoglione" },
+                { id: "GrumentoNova", nome: "Grumento Nova" },
+                { id: "GuardiaPerticara", nome: "Guardia Perticara" },
+                { id: "MarsicoNuovo", nome: "Marsico Nuovo" },
+                { id: "Marsicovetere", nome: "Marsicovetere" },
+                { id: "Missanello", nome: "Missanello" },
+                { id: "Moliterno", nome: "Moliterno" },
+                { id: "Montemurro", nome: "Montemurro" },
+                { id: "Noepoli", nome: "Noepoli" },
+                { id: "Paterno", nome: "Paterno" },
+                { id: "Roccanova", nome: "Roccanova" },
+                { id: "SanChiricoRaparo", nome: "San Chirico Raparo" },
+                { id: "SanCostantinoAlbanese", nome: "San Costantino Albanese" },
+                { id: "SanGiorgioLucano", nome: "San Giorgio Lucano" },
+                { id: "SanMartinodAgri", nome: "San Martino d'Agri" },
+                { id: "SanPaoloAlbanese", nome: "San Paolo Albanese" },
+                { id: "SanSeverinoLucano", nome: "San Severino Lucano" },
+                { id: "SantArcangelo", nome: "Sant'Arcangelo" },
+                { id: "Sarconi", nome: "Sarconi" },
+                { id: "Senise", nome: "Senise" },
+                { id: "Spinoso", nome: "Spinoso" },
+                { id: "Stigliano", nome: "Stigliano" },
+                { id: "Teana", nome: "Teana" },
+                { id: "TerranovadiPollino", nome: "Terranova di Pollino" },
+                { id: "Tramutola", nome: "Tramutola" },
+                { id: "Tursi", nome: "Tursi" },
+                { id: "Valsinni", nome: "Valsinni" },
+                { id: "Viggiano", nome: "Viggiano" },
+            ]
+        };
+
+        // Funzione per inserire dinamicamente i comuni per base
+        function displayComuniPerBase() {
+            const comuniPerBaseDiv = document.getElementById("comuni-per-base");
+            comuniPerBaseDiv.innerHTML = ''; // Pulisce il contenuto precedente
+
+            for (const [baseName, comuni] of Object.entries(comuniPerBase)) {
+                const baseContainer = document.createElement('div');
+                baseContainer.className = 'base-container';
+
+                const baseTitle = document.createElement('h3');
+                baseTitle.className = 'base-title';
+                baseTitle.textContent = baseName;
+
+                baseContainer.appendChild(baseTitle);
+
+                comuni.forEach(comune => {
+                    const comuneSpan = document.createElement('span');
+                    comuneSpan.className = 'comune';
+                    comuneSpan.textContent = comune.nome + ` (ID: ${comune.id})`;
+                    baseContainer.appendChild(comuneSpan);
+                });
+
+                comuniPerBaseDiv.appendChild(baseContainer);
+            }
+        }
+
+        // Chiamata alla funzione per visualizzare i comuni
+        displayComuniPerBase();
+
+    </script>
+</body>
+</html>
