@@ -76,49 +76,60 @@
 
             fetch('comuni.svg')
                 .then(response => response.text())
-                .then(svg => {
-                    const parser = new DOMParser();
-                    const doc = parser.parseFromString(svg, 'image/svg+xml');
-                    const svgElement = doc.querySelector('svg');
-                    svgElement.setAttribute('viewBox', '0 0 1000 1000'); // Regola se necessario
+.then(svg => {
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(svg, 'image/svg+xml');
+    const svgElement = doc.querySelector('svg');
+    svgElement.setAttribute('viewBox', '0 0 1000 1000'); // Regola se necessario
 
-                    const svgDomani = svgElement.cloneNode(true);
+    const svgDomani = svgElement.cloneNode(true);
 
-                    mapOggi.innerHTML += new XMLSerializer().serializeToString(svgElement);
-                    mapDomani.innerHTML += new XMLSerializer().serializeToString(svgDomani);
+    mapOggi.innerHTML += new XMLSerializer().serializeToString(svgElement);
+    mapDomani.innerHTML += new XMLSerializer().serializeToString(svgDomani);
 
-                    bases.forEach(base => {
-                        const colorOggi = document.getElementById(`${base}-oggi`).value;
-                        const colorDomani = document.getElementById(`${base}-domani`).value;
+    bases.forEach(base => {
+      const colorOggi = document.getElementById(`${base}-oggi`).value;
+      const colorDomani = document.getElementById(`${base}-domani`).value;
 
-                        const svgId = baseToSvgId[base];
+      const svgIds = baseToSvgId[base]; // Ora è 'svgIds' perché potrebbe essere un array
 
-                        // Oggi
-                        const areaOggi = mapOggi.querySelector(`#${svgId}`);
-                        if (areaOggi) {
-                            if (areaOggi.tagName.toLowerCase() === 'g') {
-                                areaOggi.querySelectorAll('*').forEach(child => {
-                                    child.style.fill = colorOggi;
-                                });
-                            } else {
-                                areaOggi.style.fill = colorOggi;
-                            }
-                        }
-
-                        // Domani
-                        const areaDomani = mapDomani.querySelector(`#${svgId}`);
-                        if (areaDomani) {
-                            if (areaDomani.tagName.toLowerCase() === 'g') {
-                                areaDomani.querySelectorAll('*').forEach(child => {
-                                    child.style.fill = colorDomani;
-                                });
-                            } else {
-                                areaDomani.style.fill = colorDomani;
-                            }
-                        }
-                    });
-                });
+      // Funzione helper per applicare il colore a un elemento SVG
+      const applyColor = (element, color) => {
+        if (element) {
+          if (element.tagName.toLowerCase() === 'g') {
+            element.querySelectorAll('*').forEach(child => {
+              child.style.fill = color;
+            });
+          } else {
+            element.style.fill = color;
+          }
         }
+      };
+
+      // Oggi
+      if (Array.isArray(svgIds)) {
+        svgIds.forEach(id => {
+          const areaOggi = mapOggi.querySelector(`#${id}`);
+          applyColor(areaOggi, colorOggi);
+        });
+      } else if (typeof svgIds === 'string') {
+        const areaOggi = mapOggi.querySelector(`#${svgIds}`);
+        applyColor(areaOggi, colorOggi);
+      }
+
+      // Domani
+      if (Array.isArray(svgIds)) {
+        svgIds.forEach(id => {
+          const areaDomani = mapDomani.querySelector(`#${id}`);
+          applyColor(areaDomani, colorDomani);
+        });
+      } else if (typeof svgIds === 'string') {
+        const areaDomani = mapDomani.querySelector(`#${svgIds}`);
+        applyColor(areaDomani, colorDomani);
+      }
+    });
+  });
+     }
 
         function generatePDF() {
             const { jsPDF } = window.jspdf;
