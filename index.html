@@ -1,315 +1,137 @@
 <!DOCTYPE html>
 <html lang="it">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bollettini di Criticità</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
-        }
-
-        .container {
-            max-width: 2000px;
-            margin: auto;
-        }
-
-        .rischio-section {
-            margin-bottom: 20px;
-            border: 1px solid #ccc;
-            padding: 10px;
-        }
-
-        .rischio-header {
-            background-color: #f0f0f0;
-            padding: 10px;
-            cursor: pointer;
-        }
-
-        .rischio-content {
-            padding: 10px;
-            display: none;
-        }
-
-        .zona-input {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 10px;
-        }
-
-        .zona-input label {
-            font-weight: bold;
-        }
-
-        select {
-            padding: 5px;
-        }
-
-        .map-buttons {
-            text-align: center;
-            margin-bottom: 10px;
-        }
-
-        .map-buttons button {
-            padding: 5px 10px;
-            margin: 0 5px;
-            cursor: pointer;
-        }
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .container { max-width: 800px; margin: auto; }
+        .base { display: flex; justify-content: space-between; margin-bottom: 10px; }
+        button { margin-top: 20px; padding: 10px; cursor: pointer; }
+        .maps-container { display: flex; justify-content: space-between; margin-top: 20px; }
+        .map { width: 45%; height: 300px; border: 1px solid #000; padding: 10px; overflow: auto; }
+        .map svg { width: 100%; height: 100%; }
+        .map svg { transform: scale(0.8); transform-origin: top left; }
     </style>
 </head>
-
 <body>
     <div class="container">
         <h2>Bollettini di Criticità</h2>
-
-        <div class="rischio-section">
-            <div class="rischio-header" onclick="toggleRischio('idro')">Criticità Idrogeologica</div>
-            <div class="rischio-content" id="idro">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Base</th>
-                            <th>Oggi</th>
-                            <th>Domani</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>A1</td>
-                            <td><select id="zona-A1-idro-oggi"></select></td>
-                            <td><select id="zona-A1-idro-domani"></select></td>
-                        </tr>
-                        <tr>
-                            <td>A2</td>
-                            <td><select id="zona-A2-idro-oggi"></select></td>
-                            <td><select id="zona-A2-idro-domani"></select></td>
-                        </tr>
-                        <tr>
-                            <td>B</td>
-                            <td><select id="zona-B-idro-oggi"></select></td>
-                            <td><select id="zona-B-idro-domani"></select></td>
-                        </tr>
-                        <tr>
-                            <td>C</td>
-                            <td><select id="zona-C-idro-oggi"></select></td>
-                            <td><select id="zona-C-idro-domani"></select></td>
-                        </tr>
-                        <tr>
-                            <td>D</td>
-                            <td><select id="zona-D-idro-oggi"></select></td>
-                            <td><select id="zona-D-domani"></select></td>
-                        </tr>
-                        <tr>
-                            <td>E1</td>
-                            <td><select id="zona-E1-idro-oggi"></select></td>
-                            <td><select id="zona-E1-idro-domani"></select></td>
-                        </tr>
-                        <tr>
-                            <td>E2</td>
-                            <td><select id="zona-E2-oggi"></select></td>
-                            <td><select id="zona-E2-domani"></select></td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-
-        <div class="rischio-section">
-            <div class="rischio-header" onclick="toggleRischio('temporali')">Criticità Idrogeologica per temporali</div>
-            <div class="rischio-content" id="temporali">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Base</th>
-                            <th>Oggi</th>
-                            <th>Domani</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>A1</td>
-                            <td><select id="zona-A1-temporali-oggi"></select></td>
-                            <td><select id="zona-A1-temporali-domani"></select></td>
-                        </tr>
-                        <tr>
-                            <td>A2</td>
-                            <td><select id="zona-A2-temporali-oggi"></select></td>
-                            <td><select id="zona-A2-temporali-domani"></select></td>
-                        </tr>
-                        <tr>
-                            <td>B</td>
-                            <td><select id="zona-B-temporali-oggi"></select></td>
-                            <td><select id="zona-B-temporali-domani"></select></td>
-                        </tr>
-                        <tr>
-                            <td>C</td>
-                            <td><select id="zona-C-temporali-oggi"></select></td>
-                            <td><select id="zona-C-temporali-domani"></select></td>
-                        </tr>
-                        <tr>
-                            <td>D</td>
-                            <td><select id="zona-D-temporali-oggi"></select></td>
-                            <td><select id="zona-D-temporali-domani"></select></td>
-                        </tr>
-                        <tr>
-                            <td>E1</td>
-                            <td><select id="zona-E1-temporali-oggi"></select></td>
-                            <td><select id="zona-E1-temporali-domani"></select></td>
-                        </tr>
-                        <tr>
-                            <td>E2</td>
-                            <td><select id="zona-E2-temporali-oggi"></select></td>
-                            <td><select id="zona-E2-temporali-domani"></select></td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-
-        <div class="rischio-section">
-            <div class="rischio-header" onclick="toggleRischio('idrica')">Criticità Idrica</div>
-            <div class="rischio-content" id="idrica">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Base</th>
-                            <th>Oggi</th>
-                            <th>Domani</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>A1</td>
-                            <td><select id="zona-A1-idrica-oggi"></select></td>
-                            <td><select id="zona-A1-idrica-domani"></select></td>
-                        </tr>
-                        <tr>
-                            <td>A2</td>
-                            <td><select id="zona-A2-idrica-oggi"></select></td>
-                            <td><select id="zona-A2-idrica-domani"></select></td>
-                        </tr>
-                        <tr>
-                            <td>B</td>
-                            <td><select id="zona-B-idrica-oggi"></select></td>
-                            <td><select id="zona-B-idrica-domani"></select></td>
-                        </tr>
-                        <tr>
-                            <td>C</td>
-                            <td><select id="zona-C-idrica-oggi"></select></td>
-                            <td><select id="zona-C-idrica-domani"></select></td>
-                        </tr>
-                        <tr>
-                            <td>D</td>
-                            <td><select id="zona-D-idrica-oggi"></select></td>
-                            <td><select id="zona-D-idrica-domani"></select></td>
-                        </tr>
-                        <tr>
-                            <td>E1</td>
-                            <td><select id="zona-E1-idrica-oggi"></select></td>
-                            <td><select id="zona-E1-idrica-domani"></select></td>
-                        </tr>
-                        <tr>
-                            <td>E2</td>
-                            <td><select id="zona-E2-idrica-oggi"></select></td>
-                            <td><select id="zona-E2-idrica-domani"></select></td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-
-        <label for="criticita-mappa">Seleziona criticità per la mappa:</label>
-        <select id="criticita-mappa" name="criticita-mappa">
-            <option value="idro">Idrogeologica</option>
-            <option value="temporali">Temporali</option>
-            <option value="idrica">Idrica</option>
-        </select>
-
-        <button onclick="mostraMappa()">Mostra Mappa</button>
+        <div id="inputs"></div>
+        <button onclick="generateMaps()">Genera Mappe</button>
         <button onclick="generatePDF()">Esporta PDF</button>
-
-        <div class="map-buttons">
-            <button onclick="mostraMappaConGiorno('oggi')">Mappa Oggi</button>
-            <button onclick="mostraMappaConGiorno('domani')">Mappa Domani</button>
+        <div class="maps-container">
+            <div id="map-oggi" class="map"><h3>Oggi</h3></div>
+            <div id="map-domani" class="map"><h3>Domani</h3></div>
         </div>
     </div>
 
     <script>
-        // ... (Funzioni toggleRischio, populateSelects, generatePDF) ...
+        const bases = ["Matera", "Potenza", "Lauria", "Melfi", "Pisticci", "Venosa", "Tricarico"];
+        const colors = {
+            "Verde (Assente)": "#008000",
+            "Giallo (Ordinario)": "#FFFF00",
+            "Arancione (Moderato)": "#FFA500",
+            "Rosso (Elevato)": "#FF0000"
+        };
+        const inputsDiv = document.getElementById("inputs");
 
-        function updateMaps(giorno) {
-            const criticitaSelezionata = document.getElementById('criticita-mappa').value;
-            const map = document.createElement('div');
-            map.innerHTML = `<h3>Mappa ${giorno.charAt(0).toUpperCase() + giorno.slice(1)} (${criticitaSelezionata})</h3>`;
+        bases.forEach(base => {
+            let selectOggi = `<select id="${base}-oggi">`;
+            let selectDomani = `<select id="${base}-domani">`;
 
-            const svgUrl = 'https://raw.githubusercontent.com/Eatapples15/bollettinocom/main/comuni.svg';
+            for (const [label, color] of Object.entries(colors)) {
+                selectOggi += `<option value="${color}">${label}</option>`;
+                selectDomani += `<option value="${color}">${label}</option>`;
+            }
+            selectOggi += "</select>";
+            selectDomani += "</select>";
 
-            return fetch(svgUrl)
+            inputsDiv.innerHTML += `
+                <div class="base">
+                    <span>${base}</span>
+                    ${selectOggi}
+                    ${selectDomani}
+                </div>`;
+        });
+
+        const baseToSvgId = {
+            "Matera": "Matera",
+            "Potenza": "Potenza",
+            "Lauria": "Lauria",
+            "Melfi": "Melfi",
+            "Pisticci": "Pisticci",
+            "Venosa": "Venosa",
+            "Tricarico": "Tricarico"
+        };
+
+        function generateMaps() {
+            const mapOggi = document.getElementById("map-oggi");
+            const mapDomani = document.getElementById("map-domani");
+            mapOggi.innerHTML = "<h3>Oggi</h3>";
+            mapDomani.innerHTML = "<h3>Domani</h3>";
+
+            fetch('comuni.svg')
                 .then(response => response.text())
                 .then(svg => {
-                    map.innerHTML += svg;
+                    // Aggiungi viewBox all'SVG
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(svg, 'image/svg+xml');
+                    const svgElement = doc.querySelector('svg');
+                    svgElement.setAttribute('viewBox', '0 0 1000 1000'); // Regola i valori della viewBox
 
-                    for (const base in comuniPerBase) {
-                        const color = document.getElementById(`zona-${base}-${criticitaSelezionata}-${giorno}`).value;
+                    // Crea una copia dell'SVG per la mappa "Domani"
+                    const svgDomani = svgElement.cloneNode(true);
 
-                        comuniPerBase[base].forEach(comuneId => {
-                            const aree = map.querySelectorAll(`#${comuneId}`);
+                    mapOggi.innerHTML += new XMLSerializer().serializeToString(doc.documentElement);
+                    mapDomani.innerHTML += new XMLSerializer().serializeToString(svgDomani);
 
-                            aree.forEach(area => {
-                                if (area) area.style.fill = color;
-                            });
-                        });
-                    }
+                    bases.forEach(base => {
+                        const colorOggi = document.getElementById(`${base}-oggi`).value;
+                        const colorDomani = document.getElementById(`${base}-domani`).value;
 
-                    const svgElement = map.querySelector('svg');
+                        const svgId = baseToSvgId[base];
+                        const areaOggi = document.getElementById(svgId);
+                        const areaDomani = document.getElementById(svgId);
 
-                    if (svgElement) {
-                        svgElement.style.width = '100%';
-                        svgElement.style.height = '100%';
-                    }
+                        if (areaOggi) areaOggi.style.fill = colorOggi;
 
-                    return map.innerHTML;
-                })
-                .catch(error => {
-                    console.error('Error fetching SVG:', error);
-                    return `<p>Errore nel caricamento della mappa ${giorno}</p>`;
+                        // Seleziona gli elementi nella copia dell'SVG per la mappa "Domani"
+                        const areaDomaniCopy = mapDomani.querySelector(`#${svgId}`);
+                        if (areaDomaniCopy) areaDomaniCopy.style.fill = colorDomani;
+                    });
                 });
         }
 
-        function mostraMappaConGiorno(giorno) {
-            updateMaps(giorno).then(mapHTML => {
-                const nuovaFinestra = window.open('', '_blank');
-                nuovaFinestra.document.write(`
-                    <html>
-                        <head>
-                            <title>Mappa Criticità ${giorno.charAt(0).toUpperCase() + giorno.slice(1)}</title>
-                            <style>
-                                html, body { margin: 0; padding: 0; height: 100%; }
-                                .map {
-                                    width: 100%;
-                                    height: 100%;
-                                }
-                                .map h3 { text-align: center; }
-                                .map svg { width: 100%; height: 100%; }
-                            </style>
-                        </head>
-                        <body>
-                            <div class="map">
-                                ${mapHTML}
-                            </div>
-                        </body>
-                    </html>
-                `);
-                nuovaFinestra.document.close();
+        function generatePDF() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            doc.text("Bollettino di Criticità", 10, 10);
+            let y = 20;
+
+            bases.forEach(base => {
+                const oggiText = document.getElementById(`${base}-oggi`).selectedOptions[0].text;
+                const domaniText = document.getElementById(`${base}-domani`).selectedOptions[0].text;
+                doc.text(`${base}: Oggi - ${oggiText}, Domani - ${domaniText}`, 10, y);
+                y += 10;
+            });
+
+            // Aggiungi le mappe colorate al PDF
+            html2canvas(document.getElementById('map-oggi')).then(canvasOggi => {
+                const imgDataOggi = canvasOggi.toDataURL('image/png');
+                doc.addImage(imgDataOggi, 'PNG', 10, y, 100, 75); // Regola le coordinate e le dimensioni dell'immagine
+                y += 80;
+
+                html2canvas(document.getElementById('map-domani')).then(canvasDomani => {
+                    const imgDataDomani = canvasDomani.toDataURL('image/png');
+                    doc.addImage(imgDataDomani, 'PNG', 10, y, 100, 75); // Regola le coordinate e le dimensioni dell'immagine
+                    doc.save("bollettino_criticita.pdf");
+                });
             });
         }
-
-        populateSelects();
     </script>
 </body>
-
 </html>
