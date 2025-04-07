@@ -77,16 +77,14 @@
             fetch('comuni.svg')
                 .then(response => response.text())
                 .then(svg => {
-                    // Aggiungi viewBox all'SVG
                     const parser = new DOMParser();
                     const doc = parser.parseFromString(svg, 'image/svg+xml');
                     const svgElement = doc.querySelector('svg');
-                    svgElement.setAttribute('viewBox', '0 0 1000 1000'); // Regola i valori della viewBox
+                    svgElement.setAttribute('viewBox', '0 0 1000 1000'); // Regola se necessario
 
-                    // Crea una copia dell'SVG per la mappa "Domani"
                     const svgDomani = svgElement.cloneNode(true);
 
-                    mapOggi.innerHTML += new XMLSerializer().serializeToString(doc.documentElement);
+                    mapOggi.innerHTML += new XMLSerializer().serializeToString(svgElement);
                     mapDomani.innerHTML += new XMLSerializer().serializeToString(svgDomani);
 
                     bases.forEach(base => {
@@ -94,14 +92,30 @@
                         const colorDomani = document.getElementById(`${base}-domani`).value;
 
                         const svgId = baseToSvgId[base];
-                        const areaOggi = document.getElementById(svgId);
-                        const areaDomani = document.getElementById(svgId);
 
-                        if (areaOggi) areaOggi.style.fill = colorOggi;
+                        // Oggi
+                        const areaOggi = mapOggi.querySelector(`#${svgId}`);
+                        if (areaOggi) {
+                            if (areaOggi.tagName.toLowerCase() === 'g') {
+                                areaOggi.querySelectorAll('*').forEach(child => {
+                                    child.style.fill = colorOggi;
+                                });
+                            } else {
+                                areaOggi.style.fill = colorOggi;
+                            }
+                        }
 
-                        // Seleziona gli elementi nella copia dell'SVG per la mappa "Domani"
-                        const areaDomaniCopy = mapDomani.querySelector(`#${svgId}`);
-                        if (areaDomaniCopy) areaDomaniCopy.style.fill = colorDomani;
+                        // Domani
+                        const areaDomani = mapDomani.querySelector(`#${svgId}`);
+                        if (areaDomani) {
+                            if (areaDomani.tagName.toLowerCase() === 'g') {
+                                areaDomani.querySelectorAll('*').forEach(child => {
+                                    child.style.fill = colorDomani;
+                                });
+                            } else {
+                                areaDomani.style.fill = colorDomani;
+                            }
+                        }
                     });
                 });
         }
@@ -119,15 +133,14 @@
                 y += 10;
             });
 
-            // Aggiungi le mappe colorate al PDF
             html2canvas(document.getElementById('map-oggi')).then(canvasOggi => {
                 const imgDataOggi = canvasOggi.toDataURL('image/png');
-                doc.addImage(imgDataOggi, 'PNG', 10, y, 100, 75); // Regola le coordinate e le dimensioni dell'immagine
+                doc.addImage(imgDataOggi, 'PNG', 10, y, 100, 75);
                 y += 80;
 
                 html2canvas(document.getElementById('map-domani')).then(canvasDomani => {
                     const imgDataDomani = canvasDomani.toDataURL('image/png');
-                    doc.addImage(imgDataDomani, 'PNG', 10, y, 100, 75); // Regola le coordinate e le dimensioni dell'immagine
+                    doc.addImage(imgDataDomani, 'PNG', 10, y, 100, 75);
                     doc.save("bollettino_criticita.pdf");
                 });
             });
