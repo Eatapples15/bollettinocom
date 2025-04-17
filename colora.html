@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Selezione Colori Mappa</title>
+    <style>
+        body { font-family: sans-serif; display: flex; flex-direction: column; align-items: center; }
+        #controls { margin-bottom: 20px; border: 1px solid #ccc; padding: 15px; border-radius: 5px; display: flex; flex-direction: column; gap: 10px; }
+        #controls div { display: flex; align-items: center; gap: 10px; }
+        #controls label { width: 50px; text-align: right; }
+        #controls select { flex-grow: 1; padding: 8px; border: 1px solid #ddd; border-radius: 3px; }
+        button { padding: 10px 20px; background-color: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 16px; }
+        button:hover { background-color: #0056b3; }
+    </style>
+</head>
+<body>
+    <h1>Seleziona i Colori della Mappa</h1>
+    <div id="controls">
+        </div>
+    <button id="visualizzaMappa">Visualizza Mappa</button>
+
+    <script>
+        const controlsContainer = document.getElementById('controls');
+        const visualizzaMappaButton = document.getElementById('visualizzaMappa');
+
+        // Definisci le basi (corrispondenti agli ID degli elementi SVG)
+        const basi = {
+            A1: 'A1',
+            A2: 'A2',
+            B: 'B',
+            C: 'C',
+            D: 'D',
+            E1: 'E1',
+            E2: 'E2'
+        };
+
+        // Definisci i colori disponibili
+        const colori = {
+            red: 'Rosso',
+            blue: 'Blu',
+            green: 'Verde',
+            yellow: 'Giallo',
+            orange: 'Arancione',
+            purple: 'Viola',
+            gray: 'Grigio'
+            // Aggiungi altri colori se necessario
+        };
+
+        document.addEventListener('DOMContentLoaded', function () {
+            // Popola i controlli per la selezione dei colori
+            Object.keys(basi).forEach(baseName => {
+                const controlDiv = document.createElement('div');
+
+                const label = document.createElement('label');
+                label.setAttribute('for', `select-${baseName}`);
+                label.textContent = baseName + ':';
+                controlDiv.appendChild(label);
+
+                const select = document.createElement('select');
+                select.id = `select-${baseName}`;
+                select.dataset.targetId = baseName;
+
+                // Aggiungi un'opzione predefinita
+                const defaultOption = document.createElement('option');
+                defaultOption.value = '';
+                defaultOption.textContent = 'Seleziona un colore';
+                select.appendChild(defaultOption);
+
+                for (const value in colori) {
+                    const option = document.createElement('option');
+                    option.value = value;
+                    option.textContent = colori[value];
+                    select.appendChild(option);
+                }
+
+                controlDiv.appendChild(select);
+                controlsContainer.appendChild(controlDiv);
+            });
+
+            // Gestisci il click sul pulsante "Visualizza Mappa"
+            visualizzaMappaButton.addEventListener('click', function() {
+                const coloriSelezionati = {};
+                Object.keys(basi).forEach(baseName => {
+                    const selectElement = document.getElementById(`select-${baseName}`);
+                    if (selectElement && selectElement.value) {
+                        coloriSelezionati[baseName] = selectElement.value;
+                    }
+                });
+
+                // Salva i colori selezionati nella sessionStorage
+                sessionStorage.setItem('mappaColori', JSON.stringify(coloriSelezionati));
+
+                // Reindirizza alla pagina di visualizzazione
+                window.location.href = 'visualizza_mappa.html';
+            });
+        });
+    </script>
+</body>
+</html>
