@@ -1,57 +1,125 @@
 <!DOCTYPE html>
 <html lang="it">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Selezione Colori Mappa</title>
+    <title>Seleziona Colore Base - Bollettino Criticità</title>
     <style>
-        body { font-family: sans-serif; display: flex; flex-direction: column; align-items: center; }
-        #controls { margin-bottom: 20px; border: 1px solid #ccc; padding: 15px; border-radius: 5px; display: flex; flex-direction: column; gap: 10px; }
-        #controls div { display: flex; align-items: center; gap: 10px; }
-        #controls label { width: 50px; text-align: right; }
-        #controls select { flex-grow: 1; padding: 8px; border: 1px solid #ddd; border-radius: 3px; }
-        button { padding: 10px 20px; background-color: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 16px; }
-        button:hover { background-color: #0056b3; }
+        body {
+            font-family: sans-serif;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        #controls-container {
+            flex: 1;
+            min-width: 200px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        #controls div {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        #controls label {
+            flex-basis: 80px;
+            text-align: right;
+        }
+
+        #controls select {
+            flex-grow: 1;
+            padding: 8px;
+        }
+
+        button {
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
     </style>
 </head>
+
 <body>
-    <h1>Seleziona i Colori della Mappa</h1>
-    <div id="controls">
-        </div>
-    <button id="visualizzaMappa">Visualizza Mappa</button>
+
+    <div id="controls-container">
+        <h3>Seleziona Colore Base</h3>
+        <div id="controls">
+            </div>
+        <button id="visualizzaMappa">Visualizza Mappa</button>
+    </div>
 
     <script>
-        const controlsContainer = document.getElementById('controls');
-        const visualizzaMappaButton = document.getElementById('visualizzaMappa');
+        const A1_IDS = [
+            //comuni id A1
+        ];
 
-        // Definisci le basi (corrispondenti agli ID degli elementi SVG)
-        const basi = {
-            A1: 'A1',
-            A2: 'A2',
-            B: 'B',
-            C: 'C',
-            D: 'D',
-            E1: 'E1',
-            E2: 'E2'
-        };
+        const A2_IDS = [
+            //comuni id A2
+        ];
 
-        // Definisci i colori disponibili
+        const B_IDS = [
+            //comuni id B
+        ];
+
+        const C_IDS = [
+            //comuni id C
+        ];
+
+        const D_IDS = [
+            //comuni id D
+        ];
+
+        const E1_IDS = [
+            //comuni id E1
+        ];
+
+        const E2_IDS = [
+            //comuni id E2
+        ];
+
         const colori = {
-            red: 'Rosso',
-            blue: 'Blu',
-            green: 'Verde',
-            yellow: 'Giallo',
-            orange: 'Arancione',
-            purple: 'Viola',
-            gray: 'Grigio'
-            // Aggiungi altri colori se necessario
+            "": "Default",
+            "red": "Rosso",
+            "yellow": "Giallo",
+            "orange": "Arancione",
+            "green": "Verde"
         };
 
         document.addEventListener('DOMContentLoaded', function () {
-            // Popola i controlli per la selezione dei colori
+            const controlsContainer = document.getElementById('controls');
+            const visualizzaMappaButton = document.getElementById('visualizzaMappa');
+
+            const basi = {
+                A1: A1_IDS,
+                A2: A2_IDS,
+                B: B_IDS,
+                C: C_IDS,
+                D: D_IDS,
+                E1: E1_IDS,
+                E2: E2_IDS
+            };
+
+            const coloriSelezionati = {}; // Oggetto per memorizzare i colori selezionati
+
             Object.keys(basi).forEach(baseName => {
                 const controlDiv = document.createElement('div');
-
                 const label = document.createElement('label');
                 label.setAttribute('for', `select-${baseName}`);
                 label.textContent = baseName + ':';
@@ -61,40 +129,39 @@
                 select.id = `select-${baseName}`;
                 select.dataset.targetId = baseName;
 
-                // Aggiungi un'opzione predefinita
                 const defaultOption = document.createElement('option');
                 defaultOption.value = '';
-                defaultOption.textContent = 'Seleziona un colore';
+                defaultOption.textContent = colori[''];
                 select.appendChild(defaultOption);
 
                 for (const value in colori) {
-                    const option = document.createElement('option');
-                    option.value = value;
-                    option.textContent = colori[value];
-                    select.appendChild(option);
+                    if (value !== "") {
+                        const option = document.createElement('option');
+                        option.value = value;
+                        option.textContent = colori[value];
+                        select.appendChild(option);
+                    }
                 }
+
+                select.addEventListener('change', function (event) {
+                    coloriSelezionati[baseName] = event.target.value;
+                    console.log(`Colore selezionato per ${baseName}: ${event.target.value}`);
+                });
 
                 controlDiv.appendChild(select);
                 controlsContainer.appendChild(controlDiv);
+
+                // Inizializza il colore "Default" nell'oggetto
+                coloriSelezionati[baseName] = "";
             });
 
-            // Gestisci il click sul pulsante "Visualizza Mappa"
-            visualizzaMappaButton.addEventListener('click', function() {
-                const coloriSelezionati = {};
-                Object.keys(basi).forEach(baseName => {
-                    const selectElement = document.getElementById(`select-${baseName}`);
-                    if (selectElement && selectElement.value) {
-                        coloriSelezionati[baseName] = selectElement.value;
-                    }
-                });
-
-                // Salva i colori selezionati nella sessionStorage
+            visualizzaMappaButton.addEventListener('click', function () {
                 sessionStorage.setItem('mappaColori', JSON.stringify(coloriSelezionati));
-
-                // Reindirizza alla pagina di visualizzazione
                 window.location.href = 'visualizza.html';
             });
         });
     </script>
+
 </body>
+
 </html>
