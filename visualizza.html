@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visualizzazione Mappa Colorata</title>
+    <style>
+        body { font-family: sans-serif; display: flex; flex-direction: column; align-items: center; }
+        #mappa-container { border: 1px solid #ccc; border-radius: 5px; padding: 10px; }
+        svg { width: 80%; height: auto; } /* Adatta le dimensioni della mappa */
+    </style>
+</head>
+<body>
+    <h1>Mappa Colorata</h1>
+    <div id="mappa-container">
+        </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const mappaContainer = document.getElementById('mappa-container');
+            const coloriSalvati = sessionStorage.getItem('mappaColori');
+
+            if (coloriSalvati) {
+                const coloriSelezionati = JSON.parse(coloriSalvati);
+
+                // Inserisci qui il tuo codice SVG della mappa
+                // Assicurati che gli elementi che vuoi colorare abbiano gli ID corrispondenti alle chiavi in 'basi' (A1, A2, B, C, D, E1, E2)
+
+                // Esempio di come potresti inserire dinamicamente l'SVG (dovresti adattarlo al tuo SVG reale)
+                mappaContainer.innerHTML = `
+                    <svg viewBox="0 0 500 500" xmlns="http://www.w3.org/2000/svg">
+                        <g id="A1"><rect x="50" y="50" width="50" height="50" style="fill:lightgray;stroke-width:1;stroke:black" /></g>
+                        <g id="A2"><rect x="150" y="50" width="50" height="50" style="fill:lightgray;stroke-width:1;stroke:black" /></g>
+                        <g id="B"><circle cx="100" cy="150" r="40" style="fill:lightgray;stroke-width:1;stroke:black" /></g>
+                        <g id="C"><polygon points="250,100 300,150 200,150" style="fill:lightgray;stroke-width:1;stroke:black" /></g>
+                        <g id="D"><ellipse cx="350" cy="125" rx="30" ry="20" style="fill:lightgray;stroke-width:1;stroke:black" /></g>
+                        <g id="E1"><rect x="400" y="50" width="30" height="80" style="fill:lightgray;stroke-width:1;stroke:black" /></g>
+                        <g id="E2"><rect x="450" y="50" width="30" height="80" style="fill:lightgray;stroke-width:1;stroke:black" /></g>
+                        </svg>
+                `;
+
+                // Applica i colori salvati agli elementi SVG
+                for (const baseId in coloriSelezionati) {
+                    const element = document.getElementById(baseId);
+                    if (element) {
+                        // A seconda del tipo di elemento SVG, potresti dover impostare un attributo diverso (es. 'fill' per forme, 'stroke' per linee, ecc.)
+                        const svgElement = element.querySelector('*'); // Seleziona il primo elemento figlio del gruppo
+                        if (svgElement && svgElement.hasAttribute('fill')) {
+                            svgElement.setAttribute('fill', coloriSelezionati[baseId]);
+                        } else if (element.hasAttribute('fill')) {
+                            element.setAttribute('fill', coloriSelezionati[baseId]);
+                        } else if (svgElement && svgElement.hasAttribute('stroke')) {
+                            svgElement.setAttribute('stroke', coloriSelezionati[baseId]);
+                        } else if (element.hasAttribute('stroke')) {
+                            element.setAttribute('stroke', coloriSelezionati[baseId]);
+                        }
+                    }
+                }
+            } else {
+                mappaContainer.innerHTML = '<p>Nessun colore selezionato.</p>';
+            }
+        });
+    </script>
+</body>
+</html>
